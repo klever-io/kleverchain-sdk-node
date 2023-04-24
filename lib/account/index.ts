@@ -114,11 +114,19 @@ class Account {
     const nonce = options?.nonce ? options.nonce : this.nonce;
     const permID = options?.permID || 0;
 
+    const parsedMetadata: string[] = [];
+
+    txData?.forEach((data) => {
+      if (data) {
+        parsedMetadata.push(Buffer.from(data).toString("base64"));
+      }
+    });
+
     const txBody: ITxRequest = {
       type: fistContractType,
       nonce,
       sender: this.address,
-      data: txData || [],
+      data: parsedMetadata,
       permID,
       contracts: payloads,
     };
