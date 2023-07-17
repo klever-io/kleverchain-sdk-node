@@ -13,7 +13,7 @@ const decodeAddress = async (address: string): Promise<Uint8Array> => {
 
 const encodeAddress = (address: Uint8Array): string => {
   const encoded = bech32.encode("klv", bech32.toWords(address));
-  return encoded
+  return encoded;
 };
 
 const toHex = (data: Uint8Array): string => {
@@ -143,6 +143,25 @@ const validateSignature = async (
   const response = await ed.verify(signature, message, publicKey);
 
   return response;
+};
+
+export const parseHexOperations = (hex: string): string => {
+  let paddedHex = hex;
+  if (paddedHex.length % 2 !== 0) {
+    paddedHex = "0" + paddedHex;
+  }
+
+  let newHex = "";
+  for (let i = 0; i < paddedHex.length; i += 2) {
+    newHex = paddedHex.slice(i, i + 2) + newHex;
+  }
+
+  return newHex;
+};
+
+export const parseBinaryOperations = (binary: string): string => {
+  const hex = Number(`0b${binary}`).toString(16);
+  return parseHexOperations(hex);
 };
 
 const utils = {
