@@ -20,6 +20,19 @@ const toHex = (data: Uint8Array): string => {
   return Buffer.from(data).toString("hex");
 };
 
+const validateAddress = async (address: string): Promise<boolean> => {
+  try {
+    const decoded = bech32.decode(address);
+    const decodedBytes = bech32.fromWords(decoded.words);
+    if (decoded.prefix !== "klv" || decodedBytes.length !== 32) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 const getAddressFromPrivateKey = async (
   privateKey: string
 ): Promise<string> => {
@@ -179,6 +192,7 @@ const utils = {
   encodeAddress,
   toHex,
   validateSignature,
+  validateAddress,
 };
 
 export default utils;
