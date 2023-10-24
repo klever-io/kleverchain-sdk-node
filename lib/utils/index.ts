@@ -20,6 +20,10 @@ const toHex = (data: Uint8Array): string => {
   return Buffer.from(data).toString("hex");
 };
 
+const fromHex = (hex: string): Uint8Array => {
+  return Buffer.from(hex, "hex");
+};
+
 const validateAddress = async (address: string): Promise<boolean> => {
   try {
     const decoded = bech32.decode(address);
@@ -191,6 +195,7 @@ const utils = {
   decodeAddress,
   encodeAddress,
   toHex,
+  fromHex,
   validateSignature,
   validateAddress,
 };
