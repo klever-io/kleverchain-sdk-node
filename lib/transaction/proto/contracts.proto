@@ -6,11 +6,11 @@ option go_package = "./;transaction";
 
 // TXContract available
 message TransferContract {
-	bytes ToAddress    = 1;
-	bytes AssetID      = 2;
-	int64 Amount       = 3;
-	int64 KDARoyalties = 4;
-  int64 KLVRoyalties = 5;
+    bytes ToAddress    = 1;
+    bytes AssetID      = 2;
+    int64 Amount       = 3;
+    int64 KDARoyalties = 4;
+    int64 KLVRoyalties = 5;
 }
 
 // CreateAssetContract holds the data for a Klever digital asset
@@ -20,15 +20,15 @@ message CreateAssetContract {
         NonFungible  = 1;
         SemiFungible = 2;
     }
-    EnumAssetType        Type                      = 1 ;
-    bytes                Name                      = 2 ;
-    bytes                Ticker                    = 3 ;
-    bytes                OwnerAddress              = 4 ;
-    string               Logo                      = 5 ;
-    map<string, string>  URIs                      = 6 ;
-    uint32               Precision                 = 7 ;
-    int64                InitialSupply             = 8 ;
-    int64                MaxSupply                 = 9 ;
+    EnumAssetType        Type                      = 1;
+    bytes                Name                      = 2;
+    bytes                Ticker                    = 3;
+    bytes                OwnerAddress              = 4;
+    string               Logo                      = 5;
+    map<string, string>  URIs                      = 6;
+    uint32               Precision                 = 7;
+    int64                InitialSupply             = 8;
+    int64                MaxSupply                 = 9;
     RoyaltiesInfo        Royalties                 = 10;
     PropertiesInfo       Properties                = 11;
     AttributesInfo       Attributes                = 12;
@@ -102,16 +102,16 @@ message RoyaltySplitInfo {
 
 // RoyaltyInfo holds the royalty threshold
 message RoyaltyInfo {
-    int64  Amount     = 1 ;
-    uint32 Percentage = 2 ;
+    int64  Amount     = 1;
+    uint32 Percentage = 2;
 }
 
 // KDAPoolInfo holds the KDA Fee pool info
 message KDAPoolInfo {
-    bool                Active           = 1 ;
-    bytes               AdminAddress     = 2 ;
-    int64               FRatioKDA        = 3 ;
-    int64               FRatioKLV        = 4 ;
+    bool                Active           = 1;
+    bytes               AdminAddress     = 2;
+    int64               FRatioKDA        = 3;
+    int64               FRatioKLV        = 4;
 }
 
 // AssetTriggerContract triggers assets functions
@@ -136,15 +136,15 @@ message AssetTriggerContract {
         StopRoyaltiesChange     = 16;
         StopNFTMetadataChange   = 17;
     }
-    EnumTriggerType    TriggerType  = 1 ;
-	bytes              AssetID      = 2 ;
-    bytes              ToAddress    = 3 ;
-	int64              Amount       = 4 ;
-	bytes              MIME         = 5 ;
-	string             Logo         = 6 ;
-	map<string,string> URIs         = 7 ;
-    RolesInfo          Role         = 8 ;
-    StakingInfo        Staking      = 9 ;
+    EnumTriggerType    TriggerType  = 1;
+	  bytes              AssetID      = 2;
+    bytes              ToAddress    = 3;
+    int64              Amount       = 4;
+    bytes              MIME         = 5;
+    string             Logo         = 6;
+    map<string,string> URIs         = 7;
+    RolesInfo          Role         = 8;
+    StakingInfo        Staking      = 9;
     RoyaltiesInfo      Royalties    = 10;
     KDAPoolInfo        KDAPool      = 11;
     int64              Value        = 12;
@@ -252,15 +252,15 @@ message ConfigITOContract {
         ActiveITO  = 1;
         PausedITO  = 2;
     }
-    bytes                      AssetID                 = 1 ;
-    bytes                      ReceiverAddress         = 2 ;
-    EnumITOStatus              Status                  = 3 ;
-    int64                      MaxAmount               = 4 ;
-    map<string, PackInfo>      PackInfo                = 5 ;
-    int64                      DefaultLimitPerAddress  = 6 ;
-    EnumITOStatus              WhitelistStatus         = 7 ;
-    map<string, WhitelistInfo> WhitelistInfo           = 8 ;
-    int64                      WhitelistStartTime      = 9 ;
+    bytes                      AssetID                 = 1;
+    bytes                      ReceiverAddress         = 2;
+    EnumITOStatus              Status                  = 3;
+    int64                      MaxAmount               = 4;
+    map<string, PackInfo>      PackInfo                = 5;
+    int64                      DefaultLimitPerAddress  = 6;
+    EnumITOStatus              WhitelistStatus         = 7;
+    map<string, WhitelistInfo> WhitelistInfo           = 8;
+    int64                      WhitelistStartTime      = 9;
     int64                      WhitelistEndTime        = 10;
     int64                      StartTime               = 11;
     int64                      EndTime                 = 12;
@@ -295,15 +295,15 @@ message ITOTriggerContract {
         ActiveITO  = 1;
         PausedITO  = 2;
     }
-    EnumITOTriggerType         TriggerType             = 1 ;
-    bytes                      AssetID                 = 2 ;
-    bytes                      ReceiverAddress         = 3 ;
-    EnumITOStatus              Status                  = 4 ;
-    int64                      MaxAmount               = 5 ;
-    map<string, PackInfo>      PackInfo                = 6 ;
-    int64                      DefaultLimitPerAddress  = 7 ;
-    EnumITOStatus              WhitelistStatus         = 8 ;
-    map<string, WhitelistInfo> WhitelistInfo           = 9 ;
+    EnumITOTriggerType         TriggerType             = 1;
+    bytes                      AssetID                 = 2;
+    bytes                      ReceiverAddress         = 3;
+    EnumITOStatus              Status                  = 4;
+    int64                      MaxAmount               = 5;
+    map<string, PackInfo>      PackInfo                = 6;
+    int64                      DefaultLimitPerAddress  = 7;
+    EnumITOStatus              WhitelistStatus         = 8;
+    map<string, WhitelistInfo> WhitelistInfo           = 9;
     int64                      WhitelistStartTime      = 10;
     int64                      WhitelistEndTime        = 11;
     int64                      StartTime               = 12;
