@@ -8,33 +8,37 @@ import "google/protobuf/any.proto";
 
 // TXContract available
 message TXContract {
-	enum ContractType {
-		TransferContractType                  = 0;
-		CreateAssetContractType               = 1;
-		CreateValidatorContractType           = 2;
-		ValidatorConfigContractType           = 3;
-		FreezeContractType                    = 4;
-		UnfreezeContractType                  = 5;
-		DelegateContractType                  = 6;
-		UndelegateContractType                = 7;
-		WithdrawContractType                  = 8;
-		ClaimContractType                     = 9;
-		UnjailContractType                    = 10;
-		AssetTriggerContractType              = 11;
-		SetAccountNameContractType            = 12;
-		ProposalContractType                  = 13;
-		VoteContractType                      = 14;
-		ConfigITOContractType                 = 15;
-		SetITOPricesContractType              = 16;
-		BuyContractType                       = 17;
-		SellContractType                      = 18;
-		CancelMarketOrderContractType         = 19;
-		CreateMarketplaceContractType         = 20;
-		ConfigMarketplaceContractType         = 21;
-		UpdateAccountPermissionContractType   = 22;
-	}
-	ContractType Type 				= 1;
-	google.protobuf.Any Parameter 	= 2;
+    enum ContractType {
+        TransferContractType                  = 0;
+        CreateAssetContractType               = 1;
+        CreateValidatorContractType           = 2;
+        ValidatorConfigContractType           = 3;
+        FreezeContractType                    = 4;
+        UnfreezeContractType                  = 5;
+        DelegateContractType                  = 6;
+        UndelegateContractType                = 7;
+        WithdrawContractType                  = 8;
+        ClaimContractType                     = 9;
+        UnjailContractType                    = 10;
+        AssetTriggerContractType              = 11;
+        SetAccountNameContractType            = 12;
+        ProposalContractType                  = 13;
+        VoteContractType                      = 14;
+        ConfigITOContractType                 = 15;
+        SetITOPricesContractType              = 16;
+        BuyContractType                       = 17;
+        SellContractType                      = 18;
+        CancelMarketOrderContractType         = 19;
+        CreateMarketplaceContractType         = 20;
+        ConfigMarketplaceContractType         = 21;
+        UpdateAccountPermissionContractType   = 22;
+        DepositContractType                   = 23;
+        ITOTriggerContractType                = 24;
+
+        SmartContractType                     = 99;
+    }
+    ContractType Type                 = 1;
+    google.protobuf.Any Parameter     = 2;
 }
 
 // Transaction holds all the data needed for a value transfer
@@ -44,77 +48,120 @@ message Transaction {
         FAILED  = 1;
     }
 
-	enum TXResultCode {
-        Ok                      = 0;
-        OutOfFunds              = 1;
-        AccountError            = 2;
-        AssetError              = 3;
-        ContractInvalid         = 4;
-        ContractNotFound        = 5;
-        FeeInvalid              = 6;
-        ParameterInvalid        = 7;
-        APRInvalid              = 8;
-        AssetIDInvalid          = 9;
-        AssetTypeInvalid        = 10;
-        AssetCantBeMinted       = 11;
-        AssetCantBeBurned       = 12;
-        AssetCantBePaused       = 13;
-        AssetCantBeDelegated    = 14;
-        AssetOwnerCantBeChanged = 15;
-        AccountNotOwner         = 16;
-        CommissionTooHigh       = 17;
-        DelegationAmountInvalid = 18;
-        ProposalNotActive       = 19;
-        ValueInvalid            = 20;
-        AmountInvalid           = 21;
-        BucketIDInvalid         = 22;
-        KeyConflict             = 23;
-        MaxDelegationAmount     = 24;
-        InvalidPeerKey          = 25;
-        MinKFIStakedUnreached   = 26;
-        MaxSupplyExeeced        = 27;
-        SaveAccountError        = 28;
-        LoadAccountError        = 29;
-        SameAccountError        = 30;
-        AssetPaused             = 31;
-        DeletegateError         = 32;
-        WithdrawNotAvailable    = 33;
-        ErrOverflow             = 34;
-        SetStakingErr           = 35;
-        SetMarketOrderErr       = 36;
-        BalanceError            = 37;
-        KAPPError               = 38;
-        UnfreezeError           = 39;
-        UndeletegateError       = 40;
-        WithdrawError           = 41;
-        ClaimError              = 42;
-        BucketsExceded          = 43;
-        AssetCantBeWiped        = 44;
-        AssetCantAddRoles       = 45;
-        FreezeError             = 46;
-        Fail                    = 99;
-	}
+    enum TXResultCode {
+        Ok                       = 0;
+        // OutOfFunds is returned when the caller (sender) runs out of funds.
+        OutOfFunds               = 1;
+        AccountError             = 2;
+        AssetError               = 3;
+        ContractInvalid          = 4;
+        // ContractNotFound is returned when the called contract does not exist.
+        ContractNotFound         = 5;
+        FeeInvalid               = 6;
+        ParameterInvalid         = 7;
+        APRInvalid               = 8;
+        AssetIDInvalid           = 9;
+        AssetTypeInvalid         = 10;
+        AssetCantBeMinted        = 11;
+        AssetCantBeBurned        = 12;
+        AssetCantBePaused        = 13;
+        AssetCantBeDelegated     = 14;
+        AssetOwnerCantBeChanged  = 15;
+        AccountNotOwner          = 16;
+        CommissionTooHigh        = 17;
+        DelegationAmountInvalid  = 18;
+        ProposalNotActive        = 19;
+        ValueInvalid             = 20;
+        AmountInvalid            = 21;
+        BucketIDInvalid          = 22;
+        KeyConflict              = 23;
+        MaxDelegationAmount      = 24;
+        InvalidPeerKey           = 25;
+        MinKFIStakedUnreached    = 26;
+        MaxSupplyExceeded        = 27;
+        SaveAccountError         = 28;
+        LoadAccountError         = 29;
+        SameAccountError         = 30;
+        AssetPaused              = 31;
+        DeletegateError          = 32;
+        WithdrawNotAvailable     = 33;
+        ErrOverflow              = 34;
+        SetStakingErr            = 35;
+        SetMarketOrderErr        = 36;
+        BalanceError             = 37;
+        KAPPError                = 38;
+        UnfreezeError            = 39;
+        UndeletegateError        = 40;
+        WithdrawError            = 41;
+        ClaimError               = 42;
+        BucketsExceeded          = 43;
+        AssetCantBeWiped         = 44;
+        AssetCantAddRoles        = 45;
+        FreezeError              = 46;
+        ITONotActive             = 47;
+        NFTMintStopped           = 48;
+        RoyaltiesChangeStopped   = 49;
+        ITOKAPPError             = 50;
+        ITOWhiteListError        = 51;
+        NFTMetadataChangeStopped = 52;
+        AlreadyExists            = 53;
+        IteratorLimitReached     = 54;
+        // FunctionNotFound is returned when the input specifies a function name that does not exist or is not public.
+        VMFunctionNotFound         = 55;
+        // FunctionWrongSignature is returned when the wrong number of arguments is provided.
+        VMFunctionWrongSignature   = 56;
+        // UserError is returned for various execution errors.
+        VMUserError                = 57;
+        // OutOfGas is returned when VM execution runs out of gas.
+        VMOutOfGas                 = 58;
+        // AccountCollision is returned when created account already exists.
+        VMAccountCollision         = 59;
+        // CallStackOverFlow is returned when stack overflow occurs.
+        VMCallStackOverFlow        = 60;
+        // Execution Panicked
+        VMExecutionPanicked        = 61;
+        // ExecutionFailed is returned when the execution of the specified function has failed.
+        VMExecutionFailed          = 62;
+        // UpgradeFailed is returned when the upgrade of the contract has failed
+        VMUpgradeFailed            = 63;
+        // SimulateFailed is returned when tx simulation fails execution
+        VMSimulateFailed           = 64;
+        // KDA Transfer not allowed
+        KDATransferNotAllowed      = 65;
+        
+        
+        Fail                     = 99;
+    }
 
-	message Raw {
-		uint64   Nonce               = 1  ;
-		bytes    Sender              = 2  ;
-		repeated TXContract Contract = 6  ;
-		int32    PermissionID        = 7  ;
-		repeated bytes Data          = 10 ;
-		int64    KAppFee             = 13 ;
-		int64    BandwidthFee        = 14 ;
-		uint32   Version             = 15 ;
-		bytes    ChainID             = 16 ;
-	}
+    message KDAFee {
+        bytes    KDA            = 1;
+        int64    Amount         = 2;
+        // TODO: allow spread
+    }
 
-	message Receipt {
-		repeated bytes Data = 1 [json_name = "data"];
-	}
+    message Raw {
+        uint64   Nonce               = 1 ;
+        bytes    Sender              = 2 ;
+        repeated TXContract Contract = 6 ;
+        int32    PermissionID        = 7 ;
+        repeated bytes Data          = 10;
+        int64    KAppFee             = 13;
+        int64    BandwidthFee        = 14;
+        uint32   Version             = 15;
+        bytes    ChainID             = 16;
+        KDAFee   KDAFee              = 17;
+    }
 
-	Raw              RawData           = 1;
-	repeated bytes   Signature         = 2;
-	TXResult         Result            = 3;
-	TXResultCode     ResultCode        = 4;
-	repeated Receipt Receipts          = 5;
-	uint64           Block             = 6;
+    message Receipt {
+        repeated bytes Data = 1;
+    }
+
+    Raw              RawData           = 1;
+    repeated bytes   Signature         = 2;
+    TXResult         Result            = 3;
+    TXResultCode     ResultCode        = 4;
+    repeated Receipt Receipts          = 5;
+    uint64           Block             = 6;
+    uint64           GasLimit          = 7;
+    uint64           GasMultiplier     = 8;
 }

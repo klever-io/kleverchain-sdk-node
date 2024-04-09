@@ -10,6 +10,8 @@ export interface TransferContract {
   ToAddress?: Uint8Array;
   AssetID?: Uint8Array;
   Amount?: number;
+  KDARoyalties?: number;
+  KLVRoyalties?: number;
 }
 
 /** CreateAssetContract holds the data for a Klever digital asset */
@@ -33,6 +35,7 @@ export interface CreateAssetContract {
 export enum CreateAssetContract_EnumAssetType {
   Fungible = 0,
   NonFungible = 1,
+  SemiFungible = 2,
   UNRECOGNIZED = -1,
 }
 
@@ -44,6 +47,9 @@ export function createAssetContract_EnumAssetTypeFromJSON(object: any): CreateAs
     case 1:
     case "NonFungible":
       return CreateAssetContract_EnumAssetType.NonFungible;
+    case 2:
+    case "SemiFungible":
+      return CreateAssetContract_EnumAssetType.SemiFungible;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -57,6 +63,8 @@ export function createAssetContract_EnumAssetTypeToJSON(object: CreateAssetContr
       return 0;
     case CreateAssetContract_EnumAssetType.NonFungible:
       return 1;
+    case CreateAssetContract_EnumAssetType.SemiFungible:
+      return 2;
     case CreateAssetContract_EnumAssetType.UNRECOGNIZED:
     default:
       return -1;
@@ -77,12 +85,15 @@ export interface PropertiesInfo {
   CanBurn?: boolean;
   CanChangeOwner?: boolean;
   CanAddRoles?: boolean;
+  LimitTransfer?: boolean;
 }
 
 /** AttributesInfo hold the attributes structure for the KDA asset */
 export interface AttributesInfo {
   IsPaused?: boolean;
   IsNFTMintStopped?: boolean;
+  IsRoyaltiesChangeStopped?: boolean;
+  IsNFTMetadataChangeStopped?: boolean;
 }
 
 /** StakingInfo hold the staking structure for the KDA asset */
@@ -132,6 +143,8 @@ export interface RolesInfo {
   Address?: Uint8Array;
   HasRoleMint?: boolean;
   HasRoleSetITOPrices?: boolean;
+  HasRoleDeposit?: boolean;
+  HasRoleTransfer?: boolean;
 }
 
 /** RoyaltiesInfo holds the royalties for a given asset */
@@ -141,12 +154,38 @@ export interface RoyaltiesInfo {
   TransferFixed?: number;
   MarketPercentage?: number;
   MarketFixed?: number;
+  SplitRoyalties?: { [key: string]: RoyaltySplitInfo };
+  ITOFixed?: number;
+  ITOPercentage?: number;
+}
+
+export interface RoyaltiesInfo_SplitRoyaltiesEntry {
+  key: string;
+  value?: RoyaltySplitInfo;
+}
+
+/** RoyaltySplitInfo holds the royalty split */
+export interface RoyaltySplitInfo {
+  PercentTransferPercentage?: number;
+  PercentTransferFixed?: number;
+  PercentMarketPercentage?: number;
+  PercentMarketFixed?: number;
+  PercentITOPercentage?: number;
+  PercentITOFixed?: number;
 }
 
 /** RoyaltyInfo holds the royalty threshold */
 export interface RoyaltyInfo {
   Amount?: number;
   Percentage?: number;
+}
+
+/** KDAPoolInfo holds the KDA Fee pool info */
+export interface KDAPoolInfo {
+  Active?: boolean;
+  AdminAddress?: Uint8Array;
+  FRatioKDA?: number;
+  FRatioKLV?: number;
 }
 
 /** AssetTriggerContract triggers assets functions */
@@ -160,6 +199,9 @@ export interface AssetTriggerContract {
   URIs?: { [key: string]: string };
   Role?: RolesInfo;
   Staking?: StakingInfo;
+  Royalties?: RoyaltiesInfo;
+  KDAPool?: KDAPoolInfo;
+  Value?: number;
 }
 
 export enum AssetTriggerContract_EnumTriggerType {
@@ -177,6 +219,10 @@ export enum AssetTriggerContract_EnumTriggerType {
   UpdateURIs = 11,
   ChangeRoyaltiesReceiver = 12,
   UpdateStaking = 13,
+  UpdateRoyalties = 14,
+  UpdateKDAFeePool = 15,
+  StopRoyaltiesChange = 16,
+  StopNFTMetadataChange = 17,
   UNRECOGNIZED = -1,
 }
 
@@ -224,6 +270,18 @@ export function assetTriggerContract_EnumTriggerTypeFromJSON(object: any): Asset
     case 13:
     case "UpdateStaking":
       return AssetTriggerContract_EnumTriggerType.UpdateStaking;
+    case 14:
+    case "UpdateRoyalties":
+      return AssetTriggerContract_EnumTriggerType.UpdateRoyalties;
+    case 15:
+    case "UpdateKDAFeePool":
+      return AssetTriggerContract_EnumTriggerType.UpdateKDAFeePool;
+    case 16:
+    case "StopRoyaltiesChange":
+      return AssetTriggerContract_EnumTriggerType.StopRoyaltiesChange;
+    case 17:
+    case "StopNFTMetadataChange":
+      return AssetTriggerContract_EnumTriggerType.StopNFTMetadataChange;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -261,6 +319,14 @@ export function assetTriggerContract_EnumTriggerTypeToJSON(object: AssetTriggerC
       return 12;
     case AssetTriggerContract_EnumTriggerType.UpdateStaking:
       return 13;
+    case AssetTriggerContract_EnumTriggerType.UpdateRoyalties:
+      return 14;
+    case AssetTriggerContract_EnumTriggerType.UpdateKDAFeePool:
+      return 15;
+    case AssetTriggerContract_EnumTriggerType.StopRoyaltiesChange:
+      return 16;
+    case AssetTriggerContract_EnumTriggerType.StopNFTMetadataChange:
+      return 17;
     case AssetTriggerContract_EnumTriggerType.UNRECOGNIZED:
     default:
       return -1;
@@ -326,6 +392,42 @@ export interface UndelegateContract {
 /** WithdrawContract holds the data for a withdraw transaction */
 export interface WithdrawContract {
   AssetID?: Uint8Array;
+  WithdrawType?: WithdrawContract_EnumWithdrawType;
+  amount?: number;
+  CurrencyID?: Uint8Array;
+}
+
+export enum WithdrawContract_EnumWithdrawType {
+  Staking = 0,
+  KDAPool = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function withdrawContract_EnumWithdrawTypeFromJSON(object: any): WithdrawContract_EnumWithdrawType {
+  switch (object) {
+    case 0:
+    case "Staking":
+      return WithdrawContract_EnumWithdrawType.Staking;
+    case 1:
+    case "KDAPool":
+      return WithdrawContract_EnumWithdrawType.KDAPool;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return WithdrawContract_EnumWithdrawType.UNRECOGNIZED;
+  }
+}
+
+export function withdrawContract_EnumWithdrawTypeToJSON(object: WithdrawContract_EnumWithdrawType): number {
+  switch (object) {
+    case WithdrawContract_EnumWithdrawType.Staking:
+      return 0;
+    case WithdrawContract_EnumWithdrawType.KDAPool:
+      return 1;
+    case WithdrawContract_EnumWithdrawType.UNRECOGNIZED:
+    default:
+      return -1;
+  }
 }
 
 /** ClaimContract holds the data for a claim transaction */
@@ -441,6 +543,13 @@ export interface ConfigITOContract {
   Status?: ConfigITOContract_EnumITOStatus;
   MaxAmount?: number;
   PackInfo?: { [key: string]: PackInfo };
+  DefaultLimitPerAddress?: number;
+  WhitelistStatus?: ConfigITOContract_EnumITOStatus;
+  WhitelistInfo?: { [key: string]: WhitelistInfo };
+  WhitelistStartTime?: number;
+  WhitelistEndTime?: number;
+  StartTime?: number;
+  EndTime?: number;
 }
 
 export enum ConfigITOContract_EnumITOStatus {
@@ -487,6 +596,15 @@ export interface ConfigITOContract_PackInfoEntry {
   value?: PackInfo;
 }
 
+export interface ConfigITOContract_WhitelistInfoEntry {
+  key: string;
+  value?: WhitelistInfo;
+}
+
+export interface WhitelistInfo {
+  Limit?: number;
+}
+
 /** SetITOPrices holds the data for a ConfigITO transaction */
 export interface SetITOPricesContract {
   AssetID?: Uint8Array;
@@ -496,6 +614,153 @@ export interface SetITOPricesContract {
 export interface SetITOPricesContract_PackInfoEntry {
   key: string;
   value?: PackInfo;
+}
+
+/** ITOTriggerContract triggers assets functions */
+export interface ITOTriggerContract {
+  TriggerType?: ITOTriggerContract_EnumITOTriggerType;
+  AssetID?: Uint8Array;
+  ReceiverAddress?: Uint8Array;
+  Status?: ITOTriggerContract_EnumITOStatus;
+  MaxAmount?: number;
+  PackInfo?: { [key: string]: PackInfo };
+  DefaultLimitPerAddress?: number;
+  WhitelistStatus?: ITOTriggerContract_EnumITOStatus;
+  WhitelistInfo?: { [key: string]: WhitelistInfo };
+  WhitelistStartTime?: number;
+  WhitelistEndTime?: number;
+  StartTime?: number;
+  EndTime?: number;
+}
+
+export enum ITOTriggerContract_EnumITOTriggerType {
+  SetITOPrices = 0,
+  UpdateStatus = 1,
+  UpdateReceiverAddress = 2,
+  UpdateMaxAmount = 3,
+  UpdateDefaultLimitPerAddress = 4,
+  UpdateTimes = 5,
+  UpdateWhitelistStatus = 6,
+  AddToWhitelist = 7,
+  RemoveFromWhitelist = 8,
+  UpdateWhitelistTimes = 9,
+  UNRECOGNIZED = -1,
+}
+
+export function iTOTriggerContract_EnumITOTriggerTypeFromJSON(object: any): ITOTriggerContract_EnumITOTriggerType {
+  switch (object) {
+    case 0:
+    case "SetITOPrices":
+      return ITOTriggerContract_EnumITOTriggerType.SetITOPrices;
+    case 1:
+    case "UpdateStatus":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateStatus;
+    case 2:
+    case "UpdateReceiverAddress":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateReceiverAddress;
+    case 3:
+    case "UpdateMaxAmount":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateMaxAmount;
+    case 4:
+    case "UpdateDefaultLimitPerAddress":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateDefaultLimitPerAddress;
+    case 5:
+    case "UpdateTimes":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateTimes;
+    case 6:
+    case "UpdateWhitelistStatus":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateWhitelistStatus;
+    case 7:
+    case "AddToWhitelist":
+      return ITOTriggerContract_EnumITOTriggerType.AddToWhitelist;
+    case 8:
+    case "RemoveFromWhitelist":
+      return ITOTriggerContract_EnumITOTriggerType.RemoveFromWhitelist;
+    case 9:
+    case "UpdateWhitelistTimes":
+      return ITOTriggerContract_EnumITOTriggerType.UpdateWhitelistTimes;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ITOTriggerContract_EnumITOTriggerType.UNRECOGNIZED;
+  }
+}
+
+export function iTOTriggerContract_EnumITOTriggerTypeToJSON(object: ITOTriggerContract_EnumITOTriggerType): number {
+  switch (object) {
+    case ITOTriggerContract_EnumITOTriggerType.SetITOPrices:
+      return 0;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateStatus:
+      return 1;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateReceiverAddress:
+      return 2;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateMaxAmount:
+      return 3;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateDefaultLimitPerAddress:
+      return 4;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateTimes:
+      return 5;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateWhitelistStatus:
+      return 6;
+    case ITOTriggerContract_EnumITOTriggerType.AddToWhitelist:
+      return 7;
+    case ITOTriggerContract_EnumITOTriggerType.RemoveFromWhitelist:
+      return 8;
+    case ITOTriggerContract_EnumITOTriggerType.UpdateWhitelistTimes:
+      return 9;
+    case ITOTriggerContract_EnumITOTriggerType.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export enum ITOTriggerContract_EnumITOStatus {
+  DefaultITO = 0,
+  ActiveITO = 1,
+  PausedITO = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function iTOTriggerContract_EnumITOStatusFromJSON(object: any): ITOTriggerContract_EnumITOStatus {
+  switch (object) {
+    case 0:
+    case "DefaultITO":
+      return ITOTriggerContract_EnumITOStatus.DefaultITO;
+    case 1:
+    case "ActiveITO":
+      return ITOTriggerContract_EnumITOStatus.ActiveITO;
+    case 2:
+    case "PausedITO":
+      return ITOTriggerContract_EnumITOStatus.PausedITO;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ITOTriggerContract_EnumITOStatus.UNRECOGNIZED;
+  }
+}
+
+export function iTOTriggerContract_EnumITOStatusToJSON(object: ITOTriggerContract_EnumITOStatus): number {
+  switch (object) {
+    case ITOTriggerContract_EnumITOStatus.DefaultITO:
+      return 0;
+    case ITOTriggerContract_EnumITOStatus.ActiveITO:
+      return 1;
+    case ITOTriggerContract_EnumITOStatus.PausedITO:
+      return 2;
+    case ITOTriggerContract_EnumITOStatus.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export interface ITOTriggerContract_PackInfoEntry {
+  key: string;
+  value?: PackInfo;
+}
+
+export interface ITOTriggerContract_WhitelistInfoEntry {
+  key: string;
+  value?: WhitelistInfo;
 }
 
 /** PackInfo holds the pack list structure for the ITO contract */
@@ -666,8 +931,103 @@ export interface UpdateAccountPermissionContract {
   Permissions?: AccPermission[];
 }
 
+/** DepositContract holds the data for a deposit transaction */
+export interface DepositContract {
+  DepositType?: DepositContract_EnumDepositType;
+  ID?: Uint8Array;
+  CurrencyID?: Uint8Array;
+  Amount?: number;
+}
+
+export enum DepositContract_EnumDepositType {
+  FPRDeposit = 0,
+  KDAPool = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function depositContract_EnumDepositTypeFromJSON(object: any): DepositContract_EnumDepositType {
+  switch (object) {
+    case 0:
+    case "FPRDeposit":
+      return DepositContract_EnumDepositType.FPRDeposit;
+    case 1:
+    case "KDAPool":
+      return DepositContract_EnumDepositType.KDAPool;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return DepositContract_EnumDepositType.UNRECOGNIZED;
+  }
+}
+
+export function depositContract_EnumDepositTypeToJSON(object: DepositContract_EnumDepositType): number {
+  switch (object) {
+    case DepositContract_EnumDepositType.FPRDeposit:
+      return 0;
+    case DepositContract_EnumDepositType.KDAPool:
+      return 1;
+    case DepositContract_EnumDepositType.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export interface CallValue {
+  Amount?: number;
+  KDARoyalties?: number;
+  KLVRoyalties?: number;
+}
+
+export interface SmartContract {
+  Type?: SmartContract_SCType;
+  Address?: Uint8Array;
+  /**
+   * SmartContract CallValue is represented by a map of currencyID and amount
+   *  should be limited to 50 currencies
+   */
+  CallValue?: { [key: string]: CallValue };
+}
+
+export enum SmartContract_SCType {
+  SCInvoke = 0,
+  SCDeploy = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function smartContract_SCTypeFromJSON(object: any): SmartContract_SCType {
+  switch (object) {
+    case 0:
+    case "SCInvoke":
+      return SmartContract_SCType.SCInvoke;
+    case 1:
+    case "SCDeploy":
+      return SmartContract_SCType.SCDeploy;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return SmartContract_SCType.UNRECOGNIZED;
+  }
+}
+
+export function smartContract_SCTypeToJSON(object: SmartContract_SCType): number {
+  switch (object) {
+    case SmartContract_SCType.SCInvoke:
+      return 0;
+    case SmartContract_SCType.SCDeploy:
+      return 1;
+    case SmartContract_SCType.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export interface SmartContract_CallValueEntry {
+  key: string;
+  value?: CallValue;
+}
+
 function createBaseTransferContract(): TransferContract {
-  return { ToAddress: new Uint8Array(), AssetID: new Uint8Array(), Amount: 0 };
+  return { ToAddress: new Uint8Array(), AssetID: new Uint8Array(), Amount: 0, KDARoyalties: 0, KLVRoyalties: 0 };
 }
 
 export const TransferContract = {
@@ -680,6 +1040,12 @@ export const TransferContract = {
     }
     if (message.Amount !== undefined && message.Amount !== 0) {
       writer.uint32(24).int64(message.Amount);
+    }
+    if (message.KDARoyalties !== undefined && message.KDARoyalties !== 0) {
+      writer.uint32(32).int64(message.KDARoyalties);
+    }
+    if (message.KLVRoyalties !== undefined && message.KLVRoyalties !== 0) {
+      writer.uint32(40).int64(message.KLVRoyalties);
     }
     return writer;
   },
@@ -700,6 +1066,12 @@ export const TransferContract = {
         case 3:
           message.Amount = longToNumber(reader.int64() as Long);
           break;
+        case 4:
+          message.KDARoyalties = longToNumber(reader.int64() as Long);
+          break;
+        case 5:
+          message.KLVRoyalties = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -713,6 +1085,8 @@ export const TransferContract = {
       ToAddress: isSet(object.ToAddress) ? bytesFromBase64(object.ToAddress) : new Uint8Array(),
       AssetID: isSet(object.AssetID) ? bytesFromBase64(object.AssetID) : new Uint8Array(),
       Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+      KDARoyalties: isSet(object.KDARoyalties) ? Number(object.KDARoyalties) : 0,
+      KLVRoyalties: isSet(object.KLVRoyalties) ? Number(object.KLVRoyalties) : 0,
     };
   },
 
@@ -723,6 +1097,8 @@ export const TransferContract = {
     message.AssetID !== undefined &&
       (obj.AssetID = base64FromBytes(message.AssetID !== undefined ? message.AssetID : new Uint8Array()));
     message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+    message.KDARoyalties !== undefined && (obj.KDARoyalties = Math.round(message.KDARoyalties));
+    message.KLVRoyalties !== undefined && (obj.KLVRoyalties = Math.round(message.KLVRoyalties));
     return obj;
   },
 
@@ -731,6 +1107,8 @@ export const TransferContract = {
     message.ToAddress = object.ToAddress ?? new Uint8Array();
     message.AssetID = object.AssetID ?? new Uint8Array();
     message.Amount = object.Amount ?? 0;
+    message.KDARoyalties = object.KDARoyalties ?? 0;
+    message.KLVRoyalties = object.KLVRoyalties ?? 0;
     return message;
   },
 };
@@ -1022,6 +1400,7 @@ function createBasePropertiesInfo(): PropertiesInfo {
     CanBurn: false,
     CanChangeOwner: false,
     CanAddRoles: false,
+    LimitTransfer: false,
   };
 }
 
@@ -1047,6 +1426,9 @@ export const PropertiesInfo = {
     }
     if (message.CanAddRoles === true) {
       writer.uint32(56).bool(message.CanAddRoles);
+    }
+    if (message.LimitTransfer === true) {
+      writer.uint32(64).bool(message.LimitTransfer);
     }
     return writer;
   },
@@ -1079,6 +1461,9 @@ export const PropertiesInfo = {
         case 7:
           message.CanAddRoles = reader.bool();
           break;
+        case 8:
+          message.LimitTransfer = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1096,6 +1481,7 @@ export const PropertiesInfo = {
       CanBurn: isSet(object.CanBurn) ? Boolean(object.CanBurn) : false,
       CanChangeOwner: isSet(object.CanChangeOwner) ? Boolean(object.CanChangeOwner) : false,
       CanAddRoles: isSet(object.CanAddRoles) ? Boolean(object.CanAddRoles) : false,
+      LimitTransfer: isSet(object.LimitTransfer) ? Boolean(object.LimitTransfer) : false,
     };
   },
 
@@ -1108,6 +1494,7 @@ export const PropertiesInfo = {
     message.CanBurn !== undefined && (obj.CanBurn = message.CanBurn);
     message.CanChangeOwner !== undefined && (obj.CanChangeOwner = message.CanChangeOwner);
     message.CanAddRoles !== undefined && (obj.CanAddRoles = message.CanAddRoles);
+    message.LimitTransfer !== undefined && (obj.LimitTransfer = message.LimitTransfer);
     return obj;
   },
 
@@ -1120,12 +1507,18 @@ export const PropertiesInfo = {
     message.CanBurn = object.CanBurn ?? false;
     message.CanChangeOwner = object.CanChangeOwner ?? false;
     message.CanAddRoles = object.CanAddRoles ?? false;
+    message.LimitTransfer = object.LimitTransfer ?? false;
     return message;
   },
 };
 
 function createBaseAttributesInfo(): AttributesInfo {
-  return { IsPaused: false, IsNFTMintStopped: false };
+  return {
+    IsPaused: false,
+    IsNFTMintStopped: false,
+    IsRoyaltiesChangeStopped: false,
+    IsNFTMetadataChangeStopped: false,
+  };
 }
 
 export const AttributesInfo = {
@@ -1135,6 +1528,12 @@ export const AttributesInfo = {
     }
     if (message.IsNFTMintStopped === true) {
       writer.uint32(16).bool(message.IsNFTMintStopped);
+    }
+    if (message.IsRoyaltiesChangeStopped === true) {
+      writer.uint32(24).bool(message.IsRoyaltiesChangeStopped);
+    }
+    if (message.IsNFTMetadataChangeStopped === true) {
+      writer.uint32(32).bool(message.IsNFTMetadataChangeStopped);
     }
     return writer;
   },
@@ -1152,6 +1551,12 @@ export const AttributesInfo = {
         case 2:
           message.IsNFTMintStopped = reader.bool();
           break;
+        case 3:
+          message.IsRoyaltiesChangeStopped = reader.bool();
+          break;
+        case 4:
+          message.IsNFTMetadataChangeStopped = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1164,6 +1569,12 @@ export const AttributesInfo = {
     return {
       IsPaused: isSet(object.IsPaused) ? Boolean(object.IsPaused) : false,
       IsNFTMintStopped: isSet(object.IsNFTMintStopped) ? Boolean(object.IsNFTMintStopped) : false,
+      IsRoyaltiesChangeStopped: isSet(object.IsRoyaltiesChangeStopped)
+        ? Boolean(object.IsRoyaltiesChangeStopped)
+        : false,
+      IsNFTMetadataChangeStopped: isSet(object.IsNFTMetadataChangeStopped)
+        ? Boolean(object.IsNFTMetadataChangeStopped)
+        : false,
     };
   },
 
@@ -1171,6 +1582,9 @@ export const AttributesInfo = {
     const obj: any = {};
     message.IsPaused !== undefined && (obj.IsPaused = message.IsPaused);
     message.IsNFTMintStopped !== undefined && (obj.IsNFTMintStopped = message.IsNFTMintStopped);
+    message.IsRoyaltiesChangeStopped !== undefined && (obj.IsRoyaltiesChangeStopped = message.IsRoyaltiesChangeStopped);
+    message.IsNFTMetadataChangeStopped !== undefined &&
+      (obj.IsNFTMetadataChangeStopped = message.IsNFTMetadataChangeStopped);
     return obj;
   },
 
@@ -1178,6 +1592,8 @@ export const AttributesInfo = {
     const message = createBaseAttributesInfo();
     message.IsPaused = object.IsPaused ?? false;
     message.IsNFTMintStopped = object.IsNFTMintStopped ?? false;
+    message.IsRoyaltiesChangeStopped = object.IsRoyaltiesChangeStopped ?? false;
+    message.IsNFTMetadataChangeStopped = object.IsNFTMetadataChangeStopped ?? false;
     return message;
   },
 };
@@ -1268,7 +1684,13 @@ export const StakingInfo = {
 };
 
 function createBaseRolesInfo(): RolesInfo {
-  return { Address: new Uint8Array(), HasRoleMint: false, HasRoleSetITOPrices: false };
+  return {
+    Address: new Uint8Array(),
+    HasRoleMint: false,
+    HasRoleSetITOPrices: false,
+    HasRoleDeposit: false,
+    HasRoleTransfer: false,
+  };
 }
 
 export const RolesInfo = {
@@ -1281,6 +1703,12 @@ export const RolesInfo = {
     }
     if (message.HasRoleSetITOPrices === true) {
       writer.uint32(24).bool(message.HasRoleSetITOPrices);
+    }
+    if (message.HasRoleDeposit === true) {
+      writer.uint32(32).bool(message.HasRoleDeposit);
+    }
+    if (message.HasRoleTransfer === true) {
+      writer.uint32(40).bool(message.HasRoleTransfer);
     }
     return writer;
   },
@@ -1301,6 +1729,12 @@ export const RolesInfo = {
         case 3:
           message.HasRoleSetITOPrices = reader.bool();
           break;
+        case 4:
+          message.HasRoleDeposit = reader.bool();
+          break;
+        case 5:
+          message.HasRoleTransfer = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1314,6 +1748,8 @@ export const RolesInfo = {
       Address: isSet(object.Address) ? bytesFromBase64(object.Address) : new Uint8Array(),
       HasRoleMint: isSet(object.HasRoleMint) ? Boolean(object.HasRoleMint) : false,
       HasRoleSetITOPrices: isSet(object.HasRoleSetITOPrices) ? Boolean(object.HasRoleSetITOPrices) : false,
+      HasRoleDeposit: isSet(object.HasRoleDeposit) ? Boolean(object.HasRoleDeposit) : false,
+      HasRoleTransfer: isSet(object.HasRoleTransfer) ? Boolean(object.HasRoleTransfer) : false,
     };
   },
 
@@ -1323,6 +1759,8 @@ export const RolesInfo = {
       (obj.Address = base64FromBytes(message.Address !== undefined ? message.Address : new Uint8Array()));
     message.HasRoleMint !== undefined && (obj.HasRoleMint = message.HasRoleMint);
     message.HasRoleSetITOPrices !== undefined && (obj.HasRoleSetITOPrices = message.HasRoleSetITOPrices);
+    message.HasRoleDeposit !== undefined && (obj.HasRoleDeposit = message.HasRoleDeposit);
+    message.HasRoleTransfer !== undefined && (obj.HasRoleTransfer = message.HasRoleTransfer);
     return obj;
   },
 
@@ -1331,12 +1769,23 @@ export const RolesInfo = {
     message.Address = object.Address ?? new Uint8Array();
     message.HasRoleMint = object.HasRoleMint ?? false;
     message.HasRoleSetITOPrices = object.HasRoleSetITOPrices ?? false;
+    message.HasRoleDeposit = object.HasRoleDeposit ?? false;
+    message.HasRoleTransfer = object.HasRoleTransfer ?? false;
     return message;
   },
 };
 
 function createBaseRoyaltiesInfo(): RoyaltiesInfo {
-  return { Address: new Uint8Array(), TransferPercentage: [], TransferFixed: 0, MarketPercentage: 0, MarketFixed: 0 };
+  return {
+    Address: new Uint8Array(),
+    TransferPercentage: [],
+    TransferFixed: 0,
+    MarketPercentage: 0,
+    MarketFixed: 0,
+    SplitRoyalties: {},
+    ITOFixed: 0,
+    ITOPercentage: 0,
+  };
 }
 
 export const RoyaltiesInfo = {
@@ -1357,6 +1806,15 @@ export const RoyaltiesInfo = {
     }
     if (message.MarketFixed !== undefined && message.MarketFixed !== 0) {
       writer.uint32(40).int64(message.MarketFixed);
+    }
+    Object.entries(message.SplitRoyalties || {}).forEach(([key, value]) => {
+      RoyaltiesInfo_SplitRoyaltiesEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).ldelim();
+    });
+    if (message.ITOFixed !== undefined && message.ITOFixed !== 0) {
+      writer.uint32(56).int64(message.ITOFixed);
+    }
+    if (message.ITOPercentage !== undefined && message.ITOPercentage !== 0) {
+      writer.uint32(64).uint32(message.ITOPercentage);
     }
     return writer;
   },
@@ -1383,6 +1841,18 @@ export const RoyaltiesInfo = {
         case 5:
           message.MarketFixed = longToNumber(reader.int64() as Long);
           break;
+        case 6:
+          const entry6 = RoyaltiesInfo_SplitRoyaltiesEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.SplitRoyalties![entry6.key] = entry6.value;
+          }
+          break;
+        case 7:
+          message.ITOFixed = longToNumber(reader.int64() as Long);
+          break;
+        case 8:
+          message.ITOPercentage = reader.uint32();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1400,6 +1870,14 @@ export const RoyaltiesInfo = {
       TransferFixed: isSet(object.TransferFixed) ? Number(object.TransferFixed) : 0,
       MarketPercentage: isSet(object.MarketPercentage) ? Number(object.MarketPercentage) : 0,
       MarketFixed: isSet(object.MarketFixed) ? Number(object.MarketFixed) : 0,
+      SplitRoyalties: isObject(object.SplitRoyalties)
+        ? Object.entries(object.SplitRoyalties).reduce<{ [key: string]: RoyaltySplitInfo }>((acc, [key, value]) => {
+          acc[key] = RoyaltySplitInfo.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
+      ITOFixed: isSet(object.ITOFixed) ? Number(object.ITOFixed) : 0,
+      ITOPercentage: isSet(object.ITOPercentage) ? Number(object.ITOPercentage) : 0,
     };
   },
 
@@ -1415,6 +1893,14 @@ export const RoyaltiesInfo = {
     message.TransferFixed !== undefined && (obj.TransferFixed = Math.round(message.TransferFixed));
     message.MarketPercentage !== undefined && (obj.MarketPercentage = Math.round(message.MarketPercentage));
     message.MarketFixed !== undefined && (obj.MarketFixed = Math.round(message.MarketFixed));
+    obj.SplitRoyalties = {};
+    if (message.SplitRoyalties) {
+      Object.entries(message.SplitRoyalties).forEach(([k, v]) => {
+        obj.SplitRoyalties[k] = RoyaltySplitInfo.toJSON(v);
+      });
+    }
+    message.ITOFixed !== undefined && (obj.ITOFixed = Math.round(message.ITOFixed));
+    message.ITOPercentage !== undefined && (obj.ITOPercentage = Math.round(message.ITOPercentage));
     return obj;
   },
 
@@ -1425,6 +1911,182 @@ export const RoyaltiesInfo = {
     message.TransferFixed = object.TransferFixed ?? 0;
     message.MarketPercentage = object.MarketPercentage ?? 0;
     message.MarketFixed = object.MarketFixed ?? 0;
+    message.SplitRoyalties = Object.entries(object.SplitRoyalties ?? {}).reduce<{ [key: string]: RoyaltySplitInfo }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = RoyaltySplitInfo.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    message.ITOFixed = object.ITOFixed ?? 0;
+    message.ITOPercentage = object.ITOPercentage ?? 0;
+    return message;
+  },
+};
+
+function createBaseRoyaltiesInfo_SplitRoyaltiesEntry(): RoyaltiesInfo_SplitRoyaltiesEntry {
+  return { key: "", value: undefined };
+}
+
+export const RoyaltiesInfo_SplitRoyaltiesEntry = {
+  encode(message: RoyaltiesInfo_SplitRoyaltiesEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      RoyaltySplitInfo.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): RoyaltiesInfo_SplitRoyaltiesEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRoyaltiesInfo_SplitRoyaltiesEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = RoyaltySplitInfo.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RoyaltiesInfo_SplitRoyaltiesEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? RoyaltySplitInfo.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: RoyaltiesInfo_SplitRoyaltiesEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? RoyaltySplitInfo.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<RoyaltiesInfo_SplitRoyaltiesEntry>, I>>(
+    object: I,
+  ): RoyaltiesInfo_SplitRoyaltiesEntry {
+    const message = createBaseRoyaltiesInfo_SplitRoyaltiesEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? RoyaltySplitInfo.fromPartial(object.value)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseRoyaltySplitInfo(): RoyaltySplitInfo {
+  return {
+    PercentTransferPercentage: 0,
+    PercentTransferFixed: 0,
+    PercentMarketPercentage: 0,
+    PercentMarketFixed: 0,
+    PercentITOPercentage: 0,
+    PercentITOFixed: 0,
+  };
+}
+
+export const RoyaltySplitInfo = {
+  encode(message: RoyaltySplitInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.PercentTransferPercentage !== undefined && message.PercentTransferPercentage !== 0) {
+      writer.uint32(8).uint32(message.PercentTransferPercentage);
+    }
+    if (message.PercentTransferFixed !== undefined && message.PercentTransferFixed !== 0) {
+      writer.uint32(16).uint32(message.PercentTransferFixed);
+    }
+    if (message.PercentMarketPercentage !== undefined && message.PercentMarketPercentage !== 0) {
+      writer.uint32(24).uint32(message.PercentMarketPercentage);
+    }
+    if (message.PercentMarketFixed !== undefined && message.PercentMarketFixed !== 0) {
+      writer.uint32(32).uint32(message.PercentMarketFixed);
+    }
+    if (message.PercentITOPercentage !== undefined && message.PercentITOPercentage !== 0) {
+      writer.uint32(40).uint32(message.PercentITOPercentage);
+    }
+    if (message.PercentITOFixed !== undefined && message.PercentITOFixed !== 0) {
+      writer.uint32(48).uint32(message.PercentITOFixed);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): RoyaltySplitInfo {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRoyaltySplitInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.PercentTransferPercentage = reader.uint32();
+          break;
+        case 2:
+          message.PercentTransferFixed = reader.uint32();
+          break;
+        case 3:
+          message.PercentMarketPercentage = reader.uint32();
+          break;
+        case 4:
+          message.PercentMarketFixed = reader.uint32();
+          break;
+        case 5:
+          message.PercentITOPercentage = reader.uint32();
+          break;
+        case 6:
+          message.PercentITOFixed = reader.uint32();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RoyaltySplitInfo {
+    return {
+      PercentTransferPercentage: isSet(object.PercentTransferPercentage) ? Number(object.PercentTransferPercentage) : 0,
+      PercentTransferFixed: isSet(object.PercentTransferFixed) ? Number(object.PercentTransferFixed) : 0,
+      PercentMarketPercentage: isSet(object.PercentMarketPercentage) ? Number(object.PercentMarketPercentage) : 0,
+      PercentMarketFixed: isSet(object.PercentMarketFixed) ? Number(object.PercentMarketFixed) : 0,
+      PercentITOPercentage: isSet(object.PercentITOPercentage) ? Number(object.PercentITOPercentage) : 0,
+      PercentITOFixed: isSet(object.PercentITOFixed) ? Number(object.PercentITOFixed) : 0,
+    };
+  },
+
+  toJSON(message: RoyaltySplitInfo): unknown {
+    const obj: any = {};
+    message.PercentTransferPercentage !== undefined &&
+      (obj.PercentTransferPercentage = Math.round(message.PercentTransferPercentage));
+    message.PercentTransferFixed !== undefined && (obj.PercentTransferFixed = Math.round(message.PercentTransferFixed));
+    message.PercentMarketPercentage !== undefined &&
+      (obj.PercentMarketPercentage = Math.round(message.PercentMarketPercentage));
+    message.PercentMarketFixed !== undefined && (obj.PercentMarketFixed = Math.round(message.PercentMarketFixed));
+    message.PercentITOPercentage !== undefined && (obj.PercentITOPercentage = Math.round(message.PercentITOPercentage));
+    message.PercentITOFixed !== undefined && (obj.PercentITOFixed = Math.round(message.PercentITOFixed));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<RoyaltySplitInfo>, I>>(object: I): RoyaltySplitInfo {
+    const message = createBaseRoyaltySplitInfo();
+    message.PercentTransferPercentage = object.PercentTransferPercentage ?? 0;
+    message.PercentTransferFixed = object.PercentTransferFixed ?? 0;
+    message.PercentMarketPercentage = object.PercentMarketPercentage ?? 0;
+    message.PercentMarketFixed = object.PercentMarketFixed ?? 0;
+    message.PercentITOPercentage = object.PercentITOPercentage ?? 0;
+    message.PercentITOFixed = object.PercentITOFixed ?? 0;
     return message;
   },
 };
@@ -1467,15 +2129,15 @@ export const RoyaltyInfo = {
 
   fromJSON(object: any): RoyaltyInfo {
     return {
-      Amount: isSet(object.amount) ? Number(object.amount) : 0,
-      Percentage: isSet(object.percentage) ? Number(object.percentage) : 0,
+      Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+      Percentage: isSet(object.Percentage) ? Number(object.Percentage) : 0,
     };
   },
 
   toJSON(message: RoyaltyInfo): unknown {
     const obj: any = {};
-    message.Amount !== undefined && (obj.amount = Math.round(message.Amount));
-    message.Percentage !== undefined && (obj.percentage = Math.round(message.Percentage));
+    message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+    message.Percentage !== undefined && (obj.Percentage = Math.round(message.Percentage));
     return obj;
   },
 
@@ -1483,6 +2145,85 @@ export const RoyaltyInfo = {
     const message = createBaseRoyaltyInfo();
     message.Amount = object.Amount ?? 0;
     message.Percentage = object.Percentage ?? 0;
+    return message;
+  },
+};
+
+function createBaseKDAPoolInfo(): KDAPoolInfo {
+  return { Active: false, AdminAddress: new Uint8Array(), FRatioKDA: 0, FRatioKLV: 0 };
+}
+
+export const KDAPoolInfo = {
+  encode(message: KDAPoolInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.Active === true) {
+      writer.uint32(8).bool(message.Active);
+    }
+    if (message.AdminAddress !== undefined && message.AdminAddress.length !== 0) {
+      writer.uint32(18).bytes(message.AdminAddress);
+    }
+    if (message.FRatioKDA !== undefined && message.FRatioKDA !== 0) {
+      writer.uint32(24).int64(message.FRatioKDA);
+    }
+    if (message.FRatioKLV !== undefined && message.FRatioKLV !== 0) {
+      writer.uint32(32).int64(message.FRatioKLV);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): KDAPoolInfo {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseKDAPoolInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.Active = reader.bool();
+          break;
+        case 2:
+          message.AdminAddress = reader.bytes();
+          break;
+        case 3:
+          message.FRatioKDA = longToNumber(reader.int64() as Long);
+          break;
+        case 4:
+          message.FRatioKLV = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): KDAPoolInfo {
+    return {
+      Active: isSet(object.Active) ? Boolean(object.Active) : false,
+      AdminAddress: isSet(object.AdminAddress) ? bytesFromBase64(object.AdminAddress) : new Uint8Array(),
+      FRatioKDA: isSet(object.FRatioKDA) ? Number(object.FRatioKDA) : 0,
+      FRatioKLV: isSet(object.FRatioKLV) ? Number(object.FRatioKLV) : 0,
+    };
+  },
+
+  toJSON(message: KDAPoolInfo): unknown {
+    const obj: any = {};
+    message.Active !== undefined && (obj.Active = message.Active);
+    message.AdminAddress !== undefined &&
+      (obj.AdminAddress = base64FromBytes(
+        message.AdminAddress !== undefined ? message.AdminAddress : new Uint8Array(),
+      ));
+    message.FRatioKDA !== undefined && (obj.FRatioKDA = Math.round(message.FRatioKDA));
+    message.FRatioKLV !== undefined && (obj.FRatioKLV = Math.round(message.FRatioKLV));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<KDAPoolInfo>, I>>(object: I): KDAPoolInfo {
+    const message = createBaseKDAPoolInfo();
+    message.Active = object.Active ?? false;
+    message.AdminAddress = object.AdminAddress ?? new Uint8Array();
+    message.FRatioKDA = object.FRatioKDA ?? 0;
+    message.FRatioKLV = object.FRatioKLV ?? 0;
     return message;
   },
 };
@@ -1498,6 +2239,9 @@ function createBaseAssetTriggerContract(): AssetTriggerContract {
     URIs: {},
     Role: undefined,
     Staking: undefined,
+    Royalties: undefined,
+    KDAPool: undefined,
+    Value: 0,
   };
 }
 
@@ -1529,6 +2273,15 @@ export const AssetTriggerContract = {
     }
     if (message.Staking !== undefined) {
       StakingInfo.encode(message.Staking, writer.uint32(74).fork()).ldelim();
+    }
+    if (message.Royalties !== undefined) {
+      RoyaltiesInfo.encode(message.Royalties, writer.uint32(82).fork()).ldelim();
+    }
+    if (message.KDAPool !== undefined) {
+      KDAPoolInfo.encode(message.KDAPool, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.Value !== undefined && message.Value !== 0) {
+      writer.uint32(96).int64(message.Value);
     }
     return writer;
   },
@@ -1570,6 +2323,15 @@ export const AssetTriggerContract = {
         case 9:
           message.Staking = StakingInfo.decode(reader, reader.uint32());
           break;
+        case 10:
+          message.Royalties = RoyaltiesInfo.decode(reader, reader.uint32());
+          break;
+        case 11:
+          message.KDAPool = KDAPoolInfo.decode(reader, reader.uint32());
+          break;
+        case 12:
+          message.Value = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1594,6 +2356,9 @@ export const AssetTriggerContract = {
         : {},
       Role: isSet(object.Role) ? RolesInfo.fromJSON(object.Role) : undefined,
       Staking: isSet(object.Staking) ? StakingInfo.fromJSON(object.Staking) : undefined,
+      Royalties: isSet(object.Royalties) ? RoyaltiesInfo.fromJSON(object.Royalties) : undefined,
+      KDAPool: isSet(object.KDAPool) ? KDAPoolInfo.fromJSON(object.KDAPool) : undefined,
+      Value: isSet(object.Value) ? Number(object.Value) : 0,
     };
   },
 
@@ -1617,6 +2382,10 @@ export const AssetTriggerContract = {
     }
     message.Role !== undefined && (obj.Role = message.Role ? RolesInfo.toJSON(message.Role) : undefined);
     message.Staking !== undefined && (obj.Staking = message.Staking ? StakingInfo.toJSON(message.Staking) : undefined);
+    message.Royalties !== undefined &&
+      (obj.Royalties = message.Royalties ? RoyaltiesInfo.toJSON(message.Royalties) : undefined);
+    message.KDAPool !== undefined && (obj.KDAPool = message.KDAPool ? KDAPoolInfo.toJSON(message.KDAPool) : undefined);
+    message.Value !== undefined && (obj.Value = Math.round(message.Value));
     return obj;
   },
 
@@ -1638,6 +2407,13 @@ export const AssetTriggerContract = {
     message.Staking = (object.Staking !== undefined && object.Staking !== null)
       ? StakingInfo.fromPartial(object.Staking)
       : undefined;
+    message.Royalties = (object.Royalties !== undefined && object.Royalties !== null)
+      ? RoyaltiesInfo.fromPartial(object.Royalties)
+      : undefined;
+    message.KDAPool = (object.KDAPool !== undefined && object.KDAPool !== null)
+      ? KDAPoolInfo.fromPartial(object.KDAPool)
+      : undefined;
+    message.Value = object.Value ?? 0;
     return message;
   },
 };
@@ -2239,13 +3015,22 @@ export const UndelegateContract = {
 };
 
 function createBaseWithdrawContract(): WithdrawContract {
-  return { AssetID: new Uint8Array() };
+  return { AssetID: new Uint8Array(), WithdrawType: 0, amount: 0, CurrencyID: new Uint8Array() };
 }
 
 export const WithdrawContract = {
   encode(message: WithdrawContract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.AssetID !== undefined && message.AssetID.length !== 0) {
       writer.uint32(10).bytes(message.AssetID);
+    }
+    if (message.WithdrawType !== undefined && message.WithdrawType !== 0) {
+      writer.uint32(16).int32(message.WithdrawType);
+    }
+    if (message.amount !== undefined && message.amount !== 0) {
+      writer.uint32(24).int64(message.amount);
+    }
+    if (message.CurrencyID !== undefined && message.CurrencyID.length !== 0) {
+      writer.uint32(34).bytes(message.CurrencyID);
     }
     return writer;
   },
@@ -2260,6 +3045,15 @@ export const WithdrawContract = {
         case 1:
           message.AssetID = reader.bytes();
           break;
+        case 2:
+          message.WithdrawType = reader.int32() as any;
+          break;
+        case 3:
+          message.amount = longToNumber(reader.int64() as Long);
+          break;
+        case 4:
+          message.CurrencyID = reader.bytes();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -2269,19 +3063,32 @@ export const WithdrawContract = {
   },
 
   fromJSON(object: any): WithdrawContract {
-    return { AssetID: isSet(object.AssetID) ? bytesFromBase64(object.AssetID) : new Uint8Array() };
+    return {
+      AssetID: isSet(object.AssetID) ? bytesFromBase64(object.AssetID) : new Uint8Array(),
+      WithdrawType: isSet(object.WithdrawType) ? withdrawContract_EnumWithdrawTypeFromJSON(object.WithdrawType) : 0,
+      amount: isSet(object.amount) ? Number(object.amount) : 0,
+      CurrencyID: isSet(object.CurrencyID) ? bytesFromBase64(object.CurrencyID) : new Uint8Array(),
+    };
   },
 
   toJSON(message: WithdrawContract): unknown {
     const obj: any = {};
     message.AssetID !== undefined &&
       (obj.AssetID = base64FromBytes(message.AssetID !== undefined ? message.AssetID : new Uint8Array()));
+    message.WithdrawType !== undefined &&
+      (obj.WithdrawType = withdrawContract_EnumWithdrawTypeToJSON(message.WithdrawType));
+    message.amount !== undefined && (obj.amount = Math.round(message.amount));
+    message.CurrencyID !== undefined &&
+      (obj.CurrencyID = base64FromBytes(message.CurrencyID !== undefined ? message.CurrencyID : new Uint8Array()));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<WithdrawContract>, I>>(object: I): WithdrawContract {
     const message = createBaseWithdrawContract();
     message.AssetID = object.AssetID ?? new Uint8Array();
+    message.WithdrawType = object.WithdrawType ?? 0;
+    message.amount = object.amount ?? 0;
+    message.CurrencyID = object.CurrencyID ?? new Uint8Array();
     return message;
   },
 };
@@ -2649,7 +3456,20 @@ export const VoteContract = {
 };
 
 function createBaseConfigITOContract(): ConfigITOContract {
-  return { AssetID: new Uint8Array(), ReceiverAddress: new Uint8Array(), Status: 0, MaxAmount: 0, PackInfo: {} };
+  return {
+    AssetID: new Uint8Array(),
+    ReceiverAddress: new Uint8Array(),
+    Status: 0,
+    MaxAmount: 0,
+    PackInfo: {},
+    DefaultLimitPerAddress: 0,
+    WhitelistStatus: 0,
+    WhitelistInfo: {},
+    WhitelistStartTime: 0,
+    WhitelistEndTime: 0,
+    StartTime: 0,
+    EndTime: 0,
+  };
 }
 
 export const ConfigITOContract = {
@@ -2669,6 +3489,27 @@ export const ConfigITOContract = {
     Object.entries(message.PackInfo || {}).forEach(([key, value]) => {
       ConfigITOContract_PackInfoEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).ldelim();
     });
+    if (message.DefaultLimitPerAddress !== undefined && message.DefaultLimitPerAddress !== 0) {
+      writer.uint32(48).int64(message.DefaultLimitPerAddress);
+    }
+    if (message.WhitelistStatus !== undefined && message.WhitelistStatus !== 0) {
+      writer.uint32(56).int32(message.WhitelistStatus);
+    }
+    Object.entries(message.WhitelistInfo || {}).forEach(([key, value]) => {
+      ConfigITOContract_WhitelistInfoEntry.encode({ key: key as any, value }, writer.uint32(66).fork()).ldelim();
+    });
+    if (message.WhitelistStartTime !== undefined && message.WhitelistStartTime !== 0) {
+      writer.uint32(72).int64(message.WhitelistStartTime);
+    }
+    if (message.WhitelistEndTime !== undefined && message.WhitelistEndTime !== 0) {
+      writer.uint32(80).int64(message.WhitelistEndTime);
+    }
+    if (message.StartTime !== undefined && message.StartTime !== 0) {
+      writer.uint32(88).int64(message.StartTime);
+    }
+    if (message.EndTime !== undefined && message.EndTime !== 0) {
+      writer.uint32(96).int64(message.EndTime);
+    }
     return writer;
   },
 
@@ -2697,6 +3538,30 @@ export const ConfigITOContract = {
             message.PackInfo![entry5.key] = entry5.value;
           }
           break;
+        case 6:
+          message.DefaultLimitPerAddress = longToNumber(reader.int64() as Long);
+          break;
+        case 7:
+          message.WhitelistStatus = reader.int32() as any;
+          break;
+        case 8:
+          const entry8 = ConfigITOContract_WhitelistInfoEntry.decode(reader, reader.uint32());
+          if (entry8.value !== undefined) {
+            message.WhitelistInfo![entry8.key] = entry8.value;
+          }
+          break;
+        case 9:
+          message.WhitelistStartTime = longToNumber(reader.int64() as Long);
+          break;
+        case 10:
+          message.WhitelistEndTime = longToNumber(reader.int64() as Long);
+          break;
+        case 11:
+          message.StartTime = longToNumber(reader.int64() as Long);
+          break;
+        case 12:
+          message.EndTime = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -2717,6 +3582,20 @@ export const ConfigITOContract = {
           return acc;
         }, {})
         : {},
+      DefaultLimitPerAddress: isSet(object.DefaultLimitPerAddress) ? Number(object.DefaultLimitPerAddress) : 0,
+      WhitelistStatus: isSet(object.WhitelistStatus)
+        ? configITOContract_EnumITOStatusFromJSON(object.WhitelistStatus)
+        : 0,
+      WhitelistInfo: isObject(object.WhitelistInfo)
+        ? Object.entries(object.WhitelistInfo).reduce<{ [key: string]: WhitelistInfo }>((acc, [key, value]) => {
+          acc[key] = WhitelistInfo.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
+      WhitelistStartTime: isSet(object.WhitelistStartTime) ? Number(object.WhitelistStartTime) : 0,
+      WhitelistEndTime: isSet(object.WhitelistEndTime) ? Number(object.WhitelistEndTime) : 0,
+      StartTime: isSet(object.StartTime) ? Number(object.StartTime) : 0,
+      EndTime: isSet(object.EndTime) ? Number(object.EndTime) : 0,
     };
   },
 
@@ -2736,6 +3615,20 @@ export const ConfigITOContract = {
         obj.PackInfo[k] = PackInfo.toJSON(v);
       });
     }
+    message.DefaultLimitPerAddress !== undefined &&
+      (obj.DefaultLimitPerAddress = Math.round(message.DefaultLimitPerAddress));
+    message.WhitelistStatus !== undefined &&
+      (obj.WhitelistStatus = configITOContract_EnumITOStatusToJSON(message.WhitelistStatus));
+    obj.WhitelistInfo = {};
+    if (message.WhitelistInfo) {
+      Object.entries(message.WhitelistInfo).forEach(([k, v]) => {
+        obj.WhitelistInfo[k] = WhitelistInfo.toJSON(v);
+      });
+    }
+    message.WhitelistStartTime !== undefined && (obj.WhitelistStartTime = Math.round(message.WhitelistStartTime));
+    message.WhitelistEndTime !== undefined && (obj.WhitelistEndTime = Math.round(message.WhitelistEndTime));
+    message.StartTime !== undefined && (obj.StartTime = Math.round(message.StartTime));
+    message.EndTime !== undefined && (obj.EndTime = Math.round(message.EndTime));
     return obj;
   },
 
@@ -2754,6 +3647,21 @@ export const ConfigITOContract = {
       },
       {},
     );
+    message.DefaultLimitPerAddress = object.DefaultLimitPerAddress ?? 0;
+    message.WhitelistStatus = object.WhitelistStatus ?? 0;
+    message.WhitelistInfo = Object.entries(object.WhitelistInfo ?? {}).reduce<{ [key: string]: WhitelistInfo }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = WhitelistInfo.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    message.WhitelistStartTime = object.WhitelistStartTime ?? 0;
+    message.WhitelistEndTime = object.WhitelistEndTime ?? 0;
+    message.StartTime = object.StartTime ?? 0;
+    message.EndTime = object.EndTime ?? 0;
     return message;
   },
 };
@@ -2816,6 +3724,115 @@ export const ConfigITOContract_PackInfoEntry = {
     message.value = (object.value !== undefined && object.value !== null)
       ? PackInfo.fromPartial(object.value)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseConfigITOContract_WhitelistInfoEntry(): ConfigITOContract_WhitelistInfoEntry {
+  return { key: "", value: undefined };
+}
+
+export const ConfigITOContract_WhitelistInfoEntry = {
+  encode(message: ConfigITOContract_WhitelistInfoEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      WhitelistInfo.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ConfigITOContract_WhitelistInfoEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseConfigITOContract_WhitelistInfoEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = WhitelistInfo.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ConfigITOContract_WhitelistInfoEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? WhitelistInfo.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: ConfigITOContract_WhitelistInfoEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? WhitelistInfo.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ConfigITOContract_WhitelistInfoEntry>, I>>(
+    object: I,
+  ): ConfigITOContract_WhitelistInfoEntry {
+    const message = createBaseConfigITOContract_WhitelistInfoEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? WhitelistInfo.fromPartial(object.value)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseWhitelistInfo(): WhitelistInfo {
+  return { Limit: 0 };
+}
+
+export const WhitelistInfo = {
+  encode(message: WhitelistInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.Limit !== undefined && message.Limit !== 0) {
+      writer.uint32(8).int64(message.Limit);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WhitelistInfo {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWhitelistInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.Limit = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WhitelistInfo {
+    return { Limit: isSet(object.Limit) ? Number(object.Limit) : 0 };
+  },
+
+  toJSON(message: WhitelistInfo): unknown {
+    const obj: any = {};
+    message.Limit !== undefined && (obj.Limit = Math.round(message.Limit));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<WhitelistInfo>, I>>(object: I): WhitelistInfo {
+    const message = createBaseWhitelistInfo();
+    message.Limit = object.Limit ?? 0;
     return message;
   },
 };
@@ -2957,6 +3974,352 @@ export const SetITOPricesContract_PackInfoEntry = {
     message.key = object.key ?? "";
     message.value = (object.value !== undefined && object.value !== null)
       ? PackInfo.fromPartial(object.value)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseITOTriggerContract(): ITOTriggerContract {
+  return {
+    TriggerType: 0,
+    AssetID: new Uint8Array(),
+    ReceiverAddress: new Uint8Array(),
+    Status: 0,
+    MaxAmount: 0,
+    PackInfo: {},
+    DefaultLimitPerAddress: 0,
+    WhitelistStatus: 0,
+    WhitelistInfo: {},
+    WhitelistStartTime: 0,
+    WhitelistEndTime: 0,
+    StartTime: 0,
+    EndTime: 0,
+  };
+}
+
+export const ITOTriggerContract = {
+  encode(message: ITOTriggerContract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.TriggerType !== undefined && message.TriggerType !== 0) {
+      writer.uint32(8).int32(message.TriggerType);
+    }
+    if (message.AssetID !== undefined && message.AssetID.length !== 0) {
+      writer.uint32(18).bytes(message.AssetID);
+    }
+    if (message.ReceiverAddress !== undefined && message.ReceiverAddress.length !== 0) {
+      writer.uint32(26).bytes(message.ReceiverAddress);
+    }
+    if (message.Status !== undefined && message.Status !== 0) {
+      writer.uint32(32).int32(message.Status);
+    }
+    if (message.MaxAmount !== undefined && message.MaxAmount !== 0) {
+      writer.uint32(40).int64(message.MaxAmount);
+    }
+    Object.entries(message.PackInfo || {}).forEach(([key, value]) => {
+      ITOTriggerContract_PackInfoEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).ldelim();
+    });
+    if (message.DefaultLimitPerAddress !== undefined && message.DefaultLimitPerAddress !== 0) {
+      writer.uint32(56).int64(message.DefaultLimitPerAddress);
+    }
+    if (message.WhitelistStatus !== undefined && message.WhitelistStatus !== 0) {
+      writer.uint32(64).int32(message.WhitelistStatus);
+    }
+    Object.entries(message.WhitelistInfo || {}).forEach(([key, value]) => {
+      ITOTriggerContract_WhitelistInfoEntry.encode({ key: key as any, value }, writer.uint32(74).fork()).ldelim();
+    });
+    if (message.WhitelistStartTime !== undefined && message.WhitelistStartTime !== 0) {
+      writer.uint32(80).int64(message.WhitelistStartTime);
+    }
+    if (message.WhitelistEndTime !== undefined && message.WhitelistEndTime !== 0) {
+      writer.uint32(88).int64(message.WhitelistEndTime);
+    }
+    if (message.StartTime !== undefined && message.StartTime !== 0) {
+      writer.uint32(96).int64(message.StartTime);
+    }
+    if (message.EndTime !== undefined && message.EndTime !== 0) {
+      writer.uint32(104).int64(message.EndTime);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ITOTriggerContract {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseITOTriggerContract();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.TriggerType = reader.int32() as any;
+          break;
+        case 2:
+          message.AssetID = reader.bytes();
+          break;
+        case 3:
+          message.ReceiverAddress = reader.bytes();
+          break;
+        case 4:
+          message.Status = reader.int32() as any;
+          break;
+        case 5:
+          message.MaxAmount = longToNumber(reader.int64() as Long);
+          break;
+        case 6:
+          const entry6 = ITOTriggerContract_PackInfoEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.PackInfo![entry6.key] = entry6.value;
+          }
+          break;
+        case 7:
+          message.DefaultLimitPerAddress = longToNumber(reader.int64() as Long);
+          break;
+        case 8:
+          message.WhitelistStatus = reader.int32() as any;
+          break;
+        case 9:
+          const entry9 = ITOTriggerContract_WhitelistInfoEntry.decode(reader, reader.uint32());
+          if (entry9.value !== undefined) {
+            message.WhitelistInfo![entry9.key] = entry9.value;
+          }
+          break;
+        case 10:
+          message.WhitelistStartTime = longToNumber(reader.int64() as Long);
+          break;
+        case 11:
+          message.WhitelistEndTime = longToNumber(reader.int64() as Long);
+          break;
+        case 12:
+          message.StartTime = longToNumber(reader.int64() as Long);
+          break;
+        case 13:
+          message.EndTime = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ITOTriggerContract {
+    return {
+      TriggerType: isSet(object.TriggerType) ? iTOTriggerContract_EnumITOTriggerTypeFromJSON(object.TriggerType) : 0,
+      AssetID: isSet(object.AssetID) ? bytesFromBase64(object.AssetID) : new Uint8Array(),
+      ReceiverAddress: isSet(object.ReceiverAddress) ? bytesFromBase64(object.ReceiverAddress) : new Uint8Array(),
+      Status: isSet(object.Status) ? iTOTriggerContract_EnumITOStatusFromJSON(object.Status) : 0,
+      MaxAmount: isSet(object.MaxAmount) ? Number(object.MaxAmount) : 0,
+      PackInfo: isObject(object.PackInfo)
+        ? Object.entries(object.PackInfo).reduce<{ [key: string]: PackInfo }>((acc, [key, value]) => {
+          acc[key] = PackInfo.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
+      DefaultLimitPerAddress: isSet(object.DefaultLimitPerAddress) ? Number(object.DefaultLimitPerAddress) : 0,
+      WhitelistStatus: isSet(object.WhitelistStatus)
+        ? iTOTriggerContract_EnumITOStatusFromJSON(object.WhitelistStatus)
+        : 0,
+      WhitelistInfo: isObject(object.WhitelistInfo)
+        ? Object.entries(object.WhitelistInfo).reduce<{ [key: string]: WhitelistInfo }>((acc, [key, value]) => {
+          acc[key] = WhitelistInfo.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
+      WhitelistStartTime: isSet(object.WhitelistStartTime) ? Number(object.WhitelistStartTime) : 0,
+      WhitelistEndTime: isSet(object.WhitelistEndTime) ? Number(object.WhitelistEndTime) : 0,
+      StartTime: isSet(object.StartTime) ? Number(object.StartTime) : 0,
+      EndTime: isSet(object.EndTime) ? Number(object.EndTime) : 0,
+    };
+  },
+
+  toJSON(message: ITOTriggerContract): unknown {
+    const obj: any = {};
+    message.TriggerType !== undefined &&
+      (obj.TriggerType = iTOTriggerContract_EnumITOTriggerTypeToJSON(message.TriggerType));
+    message.AssetID !== undefined &&
+      (obj.AssetID = base64FromBytes(message.AssetID !== undefined ? message.AssetID : new Uint8Array()));
+    message.ReceiverAddress !== undefined &&
+      (obj.ReceiverAddress = base64FromBytes(
+        message.ReceiverAddress !== undefined ? message.ReceiverAddress : new Uint8Array(),
+      ));
+    message.Status !== undefined && (obj.Status = iTOTriggerContract_EnumITOStatusToJSON(message.Status));
+    message.MaxAmount !== undefined && (obj.MaxAmount = Math.round(message.MaxAmount));
+    obj.PackInfo = {};
+    if (message.PackInfo) {
+      Object.entries(message.PackInfo).forEach(([k, v]) => {
+        obj.PackInfo[k] = PackInfo.toJSON(v);
+      });
+    }
+    message.DefaultLimitPerAddress !== undefined &&
+      (obj.DefaultLimitPerAddress = Math.round(message.DefaultLimitPerAddress));
+    message.WhitelistStatus !== undefined &&
+      (obj.WhitelistStatus = iTOTriggerContract_EnumITOStatusToJSON(message.WhitelistStatus));
+    obj.WhitelistInfo = {};
+    if (message.WhitelistInfo) {
+      Object.entries(message.WhitelistInfo).forEach(([k, v]) => {
+        obj.WhitelistInfo[k] = WhitelistInfo.toJSON(v);
+      });
+    }
+    message.WhitelistStartTime !== undefined && (obj.WhitelistStartTime = Math.round(message.WhitelistStartTime));
+    message.WhitelistEndTime !== undefined && (obj.WhitelistEndTime = Math.round(message.WhitelistEndTime));
+    message.StartTime !== undefined && (obj.StartTime = Math.round(message.StartTime));
+    message.EndTime !== undefined && (obj.EndTime = Math.round(message.EndTime));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ITOTriggerContract>, I>>(object: I): ITOTriggerContract {
+    const message = createBaseITOTriggerContract();
+    message.TriggerType = object.TriggerType ?? 0;
+    message.AssetID = object.AssetID ?? new Uint8Array();
+    message.ReceiverAddress = object.ReceiverAddress ?? new Uint8Array();
+    message.Status = object.Status ?? 0;
+    message.MaxAmount = object.MaxAmount ?? 0;
+    message.PackInfo = Object.entries(object.PackInfo ?? {}).reduce<{ [key: string]: PackInfo }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = PackInfo.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    message.DefaultLimitPerAddress = object.DefaultLimitPerAddress ?? 0;
+    message.WhitelistStatus = object.WhitelistStatus ?? 0;
+    message.WhitelistInfo = Object.entries(object.WhitelistInfo ?? {}).reduce<{ [key: string]: WhitelistInfo }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = WhitelistInfo.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    message.WhitelistStartTime = object.WhitelistStartTime ?? 0;
+    message.WhitelistEndTime = object.WhitelistEndTime ?? 0;
+    message.StartTime = object.StartTime ?? 0;
+    message.EndTime = object.EndTime ?? 0;
+    return message;
+  },
+};
+
+function createBaseITOTriggerContract_PackInfoEntry(): ITOTriggerContract_PackInfoEntry {
+  return { key: "", value: undefined };
+}
+
+export const ITOTriggerContract_PackInfoEntry = {
+  encode(message: ITOTriggerContract_PackInfoEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      PackInfo.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ITOTriggerContract_PackInfoEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseITOTriggerContract_PackInfoEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = PackInfo.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ITOTriggerContract_PackInfoEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? PackInfo.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: ITOTriggerContract_PackInfoEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? PackInfo.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ITOTriggerContract_PackInfoEntry>, I>>(
+    object: I,
+  ): ITOTriggerContract_PackInfoEntry {
+    const message = createBaseITOTriggerContract_PackInfoEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? PackInfo.fromPartial(object.value)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseITOTriggerContract_WhitelistInfoEntry(): ITOTriggerContract_WhitelistInfoEntry {
+  return { key: "", value: undefined };
+}
+
+export const ITOTriggerContract_WhitelistInfoEntry = {
+  encode(message: ITOTriggerContract_WhitelistInfoEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      WhitelistInfo.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ITOTriggerContract_WhitelistInfoEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseITOTriggerContract_WhitelistInfoEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = WhitelistInfo.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ITOTriggerContract_WhitelistInfoEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? WhitelistInfo.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: ITOTriggerContract_WhitelistInfoEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? WhitelistInfo.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<ITOTriggerContract_WhitelistInfoEntry>, I>>(
+    object: I,
+  ): ITOTriggerContract_WhitelistInfoEntry {
+    const message = createBaseITOTriggerContract_WhitelistInfoEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? WhitelistInfo.fromPartial(object.value)
       : undefined;
     return message;
   },
@@ -3297,13 +4660,13 @@ export const CancelMarketOrderContract = {
   },
 
   fromJSON(object: any): CancelMarketOrderContract {
-    return { OrderID: isSet(object.orderId) ? bytesFromBase64(object.orderId) : new Uint8Array() };
+    return { OrderID: isSet(object.OrderID) ? bytesFromBase64(object.OrderID) : new Uint8Array() };
   },
 
   toJSON(message: CancelMarketOrderContract): unknown {
     const obj: any = {};
     message.OrderID !== undefined &&
-      (obj.orderId = base64FromBytes(message.OrderID !== undefined ? message.OrderID : new Uint8Array()));
+      (obj.OrderID = base64FromBytes(message.OrderID !== undefined ? message.OrderID : new Uint8Array()));
     return obj;
   },
 
@@ -3683,6 +5046,299 @@ export const UpdateAccountPermissionContract = {
   },
 };
 
+function createBaseDepositContract(): DepositContract {
+  return { DepositType: 0, ID: new Uint8Array(), CurrencyID: new Uint8Array(), Amount: 0 };
+}
+
+export const DepositContract = {
+  encode(message: DepositContract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.DepositType !== undefined && message.DepositType !== 0) {
+      writer.uint32(8).int32(message.DepositType);
+    }
+    if (message.ID !== undefined && message.ID.length !== 0) {
+      writer.uint32(18).bytes(message.ID);
+    }
+    if (message.CurrencyID !== undefined && message.CurrencyID.length !== 0) {
+      writer.uint32(26).bytes(message.CurrencyID);
+    }
+    if (message.Amount !== undefined && message.Amount !== 0) {
+      writer.uint32(32).int64(message.Amount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DepositContract {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDepositContract();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.DepositType = reader.int32() as any;
+          break;
+        case 2:
+          message.ID = reader.bytes();
+          break;
+        case 3:
+          message.CurrencyID = reader.bytes();
+          break;
+        case 4:
+          message.Amount = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DepositContract {
+    return {
+      DepositType: isSet(object.DepositType) ? depositContract_EnumDepositTypeFromJSON(object.DepositType) : 0,
+      ID: isSet(object.ID) ? bytesFromBase64(object.ID) : new Uint8Array(),
+      CurrencyID: isSet(object.CurrencyID) ? bytesFromBase64(object.CurrencyID) : new Uint8Array(),
+      Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+    };
+  },
+
+  toJSON(message: DepositContract): unknown {
+    const obj: any = {};
+    message.DepositType !== undefined && (obj.DepositType = depositContract_EnumDepositTypeToJSON(message.DepositType));
+    message.ID !== undefined && (obj.ID = base64FromBytes(message.ID !== undefined ? message.ID : new Uint8Array()));
+    message.CurrencyID !== undefined &&
+      (obj.CurrencyID = base64FromBytes(message.CurrencyID !== undefined ? message.CurrencyID : new Uint8Array()));
+    message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<DepositContract>, I>>(object: I): DepositContract {
+    const message = createBaseDepositContract();
+    message.DepositType = object.DepositType ?? 0;
+    message.ID = object.ID ?? new Uint8Array();
+    message.CurrencyID = object.CurrencyID ?? new Uint8Array();
+    message.Amount = object.Amount ?? 0;
+    return message;
+  },
+};
+
+function createBaseCallValue(): CallValue {
+  return { Amount: 0, KDARoyalties: 0, KLVRoyalties: 0 };
+}
+
+export const CallValue = {
+  encode(message: CallValue, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.Amount !== undefined && message.Amount !== 0) {
+      writer.uint32(8).int64(message.Amount);
+    }
+    if (message.KDARoyalties !== undefined && message.KDARoyalties !== 0) {
+      writer.uint32(16).int64(message.KDARoyalties);
+    }
+    if (message.KLVRoyalties !== undefined && message.KLVRoyalties !== 0) {
+      writer.uint32(24).int64(message.KLVRoyalties);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CallValue {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCallValue();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.Amount = longToNumber(reader.int64() as Long);
+          break;
+        case 2:
+          message.KDARoyalties = longToNumber(reader.int64() as Long);
+          break;
+        case 3:
+          message.KLVRoyalties = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CallValue {
+    return {
+      Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+      KDARoyalties: isSet(object.KDARoyalties) ? Number(object.KDARoyalties) : 0,
+      KLVRoyalties: isSet(object.KLVRoyalties) ? Number(object.KLVRoyalties) : 0,
+    };
+  },
+
+  toJSON(message: CallValue): unknown {
+    const obj: any = {};
+    message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+    message.KDARoyalties !== undefined && (obj.KDARoyalties = Math.round(message.KDARoyalties));
+    message.KLVRoyalties !== undefined && (obj.KLVRoyalties = Math.round(message.KLVRoyalties));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CallValue>, I>>(object: I): CallValue {
+    const message = createBaseCallValue();
+    message.Amount = object.Amount ?? 0;
+    message.KDARoyalties = object.KDARoyalties ?? 0;
+    message.KLVRoyalties = object.KLVRoyalties ?? 0;
+    return message;
+  },
+};
+
+function createBaseSmartContract(): SmartContract {
+  return { Type: 0, Address: new Uint8Array(), CallValue: {} };
+}
+
+export const SmartContract = {
+  encode(message: SmartContract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.Type !== undefined && message.Type !== 0) {
+      writer.uint32(8).int32(message.Type);
+    }
+    if (message.Address !== undefined && message.Address.length !== 0) {
+      writer.uint32(18).bytes(message.Address);
+    }
+    Object.entries(message.CallValue || {}).forEach(([key, value]) => {
+      SmartContract_CallValueEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SmartContract {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSmartContract();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.Type = reader.int32() as any;
+          break;
+        case 2:
+          message.Address = reader.bytes();
+          break;
+        case 3:
+          const entry3 = SmartContract_CallValueEntry.decode(reader, reader.uint32());
+          if (entry3.value !== undefined) {
+            message.CallValue![entry3.key] = entry3.value;
+          }
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SmartContract {
+    return {
+      Type: isSet(object.Type) ? smartContract_SCTypeFromJSON(object.Type) : 0,
+      Address: isSet(object.Address) ? bytesFromBase64(object.Address) : new Uint8Array(),
+      CallValue: isObject(object.CallValue)
+        ? Object.entries(object.CallValue).reduce<{ [key: string]: CallValue }>((acc, [key, value]) => {
+          acc[key] = CallValue.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
+    };
+  },
+
+  toJSON(message: SmartContract): unknown {
+    const obj: any = {};
+    message.Type !== undefined && (obj.Type = smartContract_SCTypeToJSON(message.Type));
+    message.Address !== undefined &&
+      (obj.Address = base64FromBytes(message.Address !== undefined ? message.Address : new Uint8Array()));
+    obj.CallValue = {};
+    if (message.CallValue) {
+      Object.entries(message.CallValue).forEach(([k, v]) => {
+        obj.CallValue[k] = CallValue.toJSON(v);
+      });
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<SmartContract>, I>>(object: I): SmartContract {
+    const message = createBaseSmartContract();
+    message.Type = object.Type ?? 0;
+    message.Address = object.Address ?? new Uint8Array();
+    message.CallValue = Object.entries(object.CallValue ?? {}).reduce<{ [key: string]: CallValue }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = CallValue.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseSmartContract_CallValueEntry(): SmartContract_CallValueEntry {
+  return { key: "", value: undefined };
+}
+
+export const SmartContract_CallValueEntry = {
+  encode(message: SmartContract_CallValueEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      CallValue.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SmartContract_CallValueEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSmartContract_CallValueEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = CallValue.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SmartContract_CallValueEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? CallValue.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: SmartContract_CallValueEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? CallValue.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<SmartContract_CallValueEntry>, I>>(object: I): SmartContract_CallValueEntry {
+    const message = createBaseSmartContract_CallValueEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? CallValue.fromPartial(object.value)
+      : undefined;
+    return message;
+  },
+};
+
 type ProtoMetaMessageOptions = {
   options?: { [key: string]: any };
   fields?: { [key: string]: { [key: string]: any } };
@@ -3747,6 +5403,30 @@ export const protoMetadata: ProtoMetadata = {
         "defaultValue": "",
         "oneofIndex": 0,
         "jsonName": "Amount",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "KDARoyalties",
+        "number": 4,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "KDARoyalties",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "KLVRoyalties",
+        "number": 5,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "KLVRoyalties",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -3978,7 +5658,7 @@ export const protoMetadata: ProtoMetadata = {
           "name": "NonFungible",
           "number": 1,
           "options": undefined,
-        }],
+        }, { "name": "SemiFungible", "number": 2, "options": undefined }],
         "options": undefined,
         "reservedRange": [],
         "reservedName": [],
@@ -4074,6 +5754,18 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "CanAddRoles",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "LimitTransfer",
+        "number": 8,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "LimitTransfer",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [],
@@ -4107,6 +5799,30 @@ export const protoMetadata: ProtoMetadata = {
         "defaultValue": "",
         "oneofIndex": 0,
         "jsonName": "IsNFTMintStopped",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "IsRoyaltiesChangeStopped",
+        "number": 3,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "IsRoyaltiesChangeStopped",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "IsNFTMetadataChangeStopped",
+        "number": 4,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "IsNFTMetadataChangeStopped",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -4237,6 +5953,30 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "HasRoleSetITOPrices",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "HasRoleDeposit",
+        "number": 4,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "HasRoleDeposit",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "HasRoleTransfer",
+        "number": 5,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "HasRoleTransfer",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [],
@@ -4308,6 +6048,166 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "MarketFixed",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "SplitRoyalties",
+        "number": 6,
+        "label": 3,
+        "type": 11,
+        "typeName": ".proto.RoyaltiesInfo.SplitRoyaltiesEntry",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "SplitRoyalties",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "ITOFixed",
+        "number": 7,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "ITOFixed",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "ITOPercentage",
+        "number": 8,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "ITOPercentage",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [{
+        "name": "SplitRoyaltiesEntry",
+        "field": [{
+          "name": "key",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "key",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "value",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.RoyaltySplitInfo",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "value",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": {
+          "messageSetWireFormat": false,
+          "noStandardDescriptorAccessor": false,
+          "deprecated": false,
+          "mapEntry": true,
+          "uninterpretedOption": [],
+        },
+        "reservedRange": [],
+        "reservedName": [],
+      }],
+      "enumType": [],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "RoyaltySplitInfo",
+      "field": [{
+        "name": "PercentTransferPercentage",
+        "number": 1,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentTransferPercentage",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PercentTransferFixed",
+        "number": 2,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentTransferFixed",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PercentMarketPercentage",
+        "number": 3,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentMarketPercentage",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PercentMarketFixed",
+        "number": 4,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentMarketFixed",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PercentITOPercentage",
+        "number": 5,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentITOPercentage",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PercentITOFixed",
+        "number": 6,
+        "label": 1,
+        "type": 13,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PercentITOFixed",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [],
@@ -4328,7 +6228,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "amount",
+        "jsonName": "Amount",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -4340,7 +6240,66 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "percentage",
+        "jsonName": "Percentage",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [],
+      "enumType": [],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "KDAPoolInfo",
+      "field": [{
+        "name": "Active",
+        "number": 1,
+        "label": 1,
+        "type": 8,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Active",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "AdminAddress",
+        "number": 2,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "AdminAddress",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "FRatioKDA",
+        "number": 3,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "FRatioKDA",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "FRatioKLV",
+        "number": 4,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "FRatioKLV",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -4462,6 +6421,42 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "Staking",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "Royalties",
+        "number": 10,
+        "label": 1,
+        "type": 11,
+        "typeName": ".proto.RoyaltiesInfo",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Royalties",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "KDAPool",
+        "number": 11,
+        "label": 1,
+        "type": 11,
+        "typeName": ".proto.KDAPoolInfo",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "KDAPool",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "Value",
+        "number": 12,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Value",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [{
@@ -4523,6 +6518,10 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "UpdateURIs", "number": 11, "options": undefined },
           { "name": "ChangeRoyaltiesReceiver", "number": 12, "options": undefined },
           { "name": "UpdateStaking", "number": 13, "options": undefined },
+          { "name": "UpdateRoyalties", "number": 14, "options": undefined },
+          { "name": "UpdateKDAFeePool", "number": 15, "options": undefined },
+          { "name": "StopRoyaltiesChange", "number": 16, "options": undefined },
+          { "name": "StopNFTMetadataChange", "number": 17, "options": undefined },
         ],
         "options": undefined,
         "reservedRange": [],
@@ -4881,10 +6880,56 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "AssetID",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "WithdrawType",
+        "number": 2,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.WithdrawContract.EnumWithdrawType",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WithdrawType",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "amount",
+        "number": 3,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "amount",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "CurrencyID",
+        "number": 4,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "CurrencyID",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [],
-      "enumType": [],
+      "enumType": [{
+        "name": "EnumWithdrawType",
+        "value": [{ "name": "Staking", "number": 0, "options": undefined }, {
+          "name": "KDAPool",
+          "number": 1,
+          "options": undefined,
+        }],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }],
       "extensionRange": [],
       "oneofDecl": [],
       "options": undefined,
@@ -5176,6 +7221,90 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "PackInfo",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "DefaultLimitPerAddress",
+        "number": 6,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "DefaultLimitPerAddress",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistStatus",
+        "number": 7,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.ConfigITOContract.EnumITOStatus",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistStatus",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistInfo",
+        "number": 8,
+        "label": 3,
+        "type": 11,
+        "typeName": ".proto.ConfigITOContract.WhitelistInfoEntry",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistInfo",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistStartTime",
+        "number": 9,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistStartTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistEndTime",
+        "number": 10,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistEndTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "StartTime",
+        "number": 11,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "StartTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "EndTime",
+        "number": 12,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "EndTime",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [{
@@ -5219,6 +7348,47 @@ export const protoMetadata: ProtoMetadata = {
         },
         "reservedRange": [],
         "reservedName": [],
+      }, {
+        "name": "WhitelistInfoEntry",
+        "field": [{
+          "name": "key",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "key",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "value",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.WhitelistInfo",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "value",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": {
+          "messageSetWireFormat": false,
+          "noStandardDescriptorAccessor": false,
+          "deprecated": false,
+          "mapEntry": true,
+          "uninterpretedOption": [],
+        },
+        "reservedRange": [],
+        "reservedName": [],
       }],
       "enumType": [{
         "name": "EnumITOStatus",
@@ -5231,6 +7401,29 @@ export const protoMetadata: ProtoMetadata = {
         "reservedRange": [],
         "reservedName": [],
       }],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "WhitelistInfo",
+      "field": [{
+        "name": "Limit",
+        "number": 1,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Limit",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [],
+      "enumType": [],
       "extensionRange": [],
       "oneofDecl": [],
       "options": undefined,
@@ -5307,6 +7500,282 @@ export const protoMetadata: ProtoMetadata = {
         "reservedName": [],
       }],
       "enumType": [],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "ITOTriggerContract",
+      "field": [{
+        "name": "TriggerType",
+        "number": 1,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.ITOTriggerContract.EnumITOTriggerType",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "TriggerType",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "AssetID",
+        "number": 2,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "AssetID",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "ReceiverAddress",
+        "number": 3,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "ReceiverAddress",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "Status",
+        "number": 4,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.ITOTriggerContract.EnumITOStatus",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Status",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "MaxAmount",
+        "number": 5,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "MaxAmount",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "PackInfo",
+        "number": 6,
+        "label": 3,
+        "type": 11,
+        "typeName": ".proto.ITOTriggerContract.PackInfoEntry",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "PackInfo",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "DefaultLimitPerAddress",
+        "number": 7,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "DefaultLimitPerAddress",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistStatus",
+        "number": 8,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.ITOTriggerContract.EnumITOStatus",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistStatus",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistInfo",
+        "number": 9,
+        "label": 3,
+        "type": 11,
+        "typeName": ".proto.ITOTriggerContract.WhitelistInfoEntry",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistInfo",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistStartTime",
+        "number": 10,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistStartTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "WhitelistEndTime",
+        "number": 11,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "WhitelistEndTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "StartTime",
+        "number": 12,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "StartTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "EndTime",
+        "number": 13,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "EndTime",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [{
+        "name": "PackInfoEntry",
+        "field": [{
+          "name": "key",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "key",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "value",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.PackInfo",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "value",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": {
+          "messageSetWireFormat": false,
+          "noStandardDescriptorAccessor": false,
+          "deprecated": false,
+          "mapEntry": true,
+          "uninterpretedOption": [],
+        },
+        "reservedRange": [],
+        "reservedName": [],
+      }, {
+        "name": "WhitelistInfoEntry",
+        "field": [{
+          "name": "key",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "key",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "value",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.WhitelistInfo",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "value",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": {
+          "messageSetWireFormat": false,
+          "noStandardDescriptorAccessor": false,
+          "deprecated": false,
+          "mapEntry": true,
+          "uninterpretedOption": [],
+        },
+        "reservedRange": [],
+        "reservedName": [],
+      }],
+      "enumType": [{
+        "name": "EnumITOTriggerType",
+        "value": [
+          { "name": "SetITOPrices", "number": 0, "options": undefined },
+          { "name": "UpdateStatus", "number": 1, "options": undefined },
+          { "name": "UpdateReceiverAddress", "number": 2, "options": undefined },
+          { "name": "UpdateMaxAmount", "number": 3, "options": undefined },
+          { "name": "UpdateDefaultLimitPerAddress", "number": 4, "options": undefined },
+          { "name": "UpdateTimes", "number": 5, "options": undefined },
+          { "name": "UpdateWhitelistStatus", "number": 6, "options": undefined },
+          { "name": "AddToWhitelist", "number": 7, "options": undefined },
+          { "name": "RemoveFromWhitelist", "number": 8, "options": undefined },
+          { "name": "UpdateWhitelistTimes", "number": 9, "options": undefined },
+        ],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }, {
+        "name": "EnumITOStatus",
+        "value": [{ "name": "DefaultITO", "number": 0, "options": undefined }, {
+          "name": "ActiveITO",
+          "number": 1,
+          "options": undefined,
+        }, { "name": "PausedITO", "number": 2, "options": undefined }],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }],
       "extensionRange": [],
       "oneofDecl": [],
       "options": undefined,
@@ -5555,7 +8024,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "orderId",
+        "jsonName": "OrderID",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -5812,6 +8281,220 @@ export const protoMetadata: ProtoMetadata = {
       "options": undefined,
       "reservedRange": [],
       "reservedName": [],
+    }, {
+      "name": "DepositContract",
+      "field": [{
+        "name": "DepositType",
+        "number": 1,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.DepositContract.EnumDepositType",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "DepositType",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "ID",
+        "number": 2,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "ID",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "CurrencyID",
+        "number": 3,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "CurrencyID",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "Amount",
+        "number": 4,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Amount",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [],
+      "enumType": [{
+        "name": "EnumDepositType",
+        "value": [{ "name": "FPRDeposit", "number": 0, "options": undefined }, {
+          "name": "KDAPool",
+          "number": 1,
+          "options": undefined,
+        }],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "CallValue",
+      "field": [{
+        "name": "Amount",
+        "number": 1,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Amount",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "KDARoyalties",
+        "number": 2,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "KDARoyalties",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "KLVRoyalties",
+        "number": 3,
+        "label": 1,
+        "type": 3,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "KLVRoyalties",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [],
+      "enumType": [],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
+    }, {
+      "name": "SmartContract",
+      "field": [{
+        "name": "Type",
+        "number": 1,
+        "label": 1,
+        "type": 14,
+        "typeName": ".proto.SmartContract.SCType",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Type",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "Address",
+        "number": 2,
+        "label": 1,
+        "type": 12,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "Address",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "CallValue",
+        "number": 3,
+        "label": 3,
+        "type": 11,
+        "typeName": ".proto.SmartContract.CallValueEntry",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "CallValue",
+        "options": undefined,
+        "proto3Optional": false,
+      }],
+      "extension": [],
+      "nestedType": [{
+        "name": "CallValueEntry",
+        "field": [{
+          "name": "key",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "key",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "value",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.CallValue",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "value",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": {
+          "messageSetWireFormat": false,
+          "noStandardDescriptorAccessor": false,
+          "deprecated": false,
+          "mapEntry": true,
+          "uninterpretedOption": [],
+        },
+        "reservedRange": [],
+        "reservedName": [],
+      }],
+      "enumType": [{
+        "name": "SCType",
+        "value": [{ "name": "SCInvoke", "number": 0, "options": undefined }, {
+          "name": "SCDeploy",
+          "number": 1,
+          "options": undefined,
+        }],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }],
+      "extensionRange": [],
+      "oneofDecl": [],
+      "options": undefined,
+      "reservedRange": [],
+      "reservedName": [],
     }],
     "enumType": [],
     "service": [],
@@ -5842,201 +8525,232 @@ export const protoMetadata: ProtoMetadata = {
     "sourceCodeInfo": {
       "location": [{
         "path": [4, 0],
-        "span": [7, 0, 11, 1],
+        "span": [7, 0, 13, 1],
         "leadingComments": " TXContract available\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 1],
-        "span": [14, 0, 33, 1],
+        "span": [16, 0, 36, 1],
         "leadingComments": " CreateAssetContract holds the data for a Klever digital asset\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 2],
-        "span": [36, 0, 44, 1],
+        "span": [39, 0, 48, 1],
         "leadingComments": " PropertiesInfo hold the properties structure for the KDA asset\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 3],
-        "span": [47, 0, 50, 1],
+        "span": [51, 0, 56, 1],
         "leadingComments": " AttributesInfo hold the attributes structure for the KDA asset\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 4],
-        "span": [53, 0, 63, 1],
+        "span": [59, 0, 69, 1],
         "leadingComments": " StakingInfo hold the staking structure for the KDA asset\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 5],
-        "span": [66, 0, 70, 1],
+        "span": [72, 0, 78, 1],
         "leadingComments": " RolesInfo holds the roles for a given asset and the given address\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 6],
-        "span": [73, 0, 79, 1],
+        "span": [81, 0, 90, 1],
         "leadingComments": " RoyaltiesInfo holds the royalties for a given asset\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 7],
-        "span": [82, 0, 85, 1],
-        "leadingComments": " RoyaltyInfo holds the royalty threshold\n",
+        "span": [93, 0, 100, 1],
+        "leadingComments": " RoyaltySplitInfo holds the royalty split\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 8],
-        "span": [88, 0, 114, 1],
-        "leadingComments": " AssetTriggerContract triggers assets functions\n",
+        "span": [103, 0, 106, 1],
+        "leadingComments": " RoyaltyInfo holds the royalty threshold\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 9],
-        "span": [117, 0, 126, 1],
-        "leadingComments": " ValidatorConfig holds the data for a validator configuration\n",
+        "span": [109, 0, 114, 1],
+        "leadingComments": " KDAPoolInfo holds the KDA Fee pool info\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 10],
-        "span": [129, 0, 132, 1],
-        "leadingComments": " CreateValidatorContract holds the data for create a validator\n",
+        "span": [117, 0, 150, 1],
+        "leadingComments": " AssetTriggerContract triggers assets functions\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 11],
-        "span": [135, 0, 137, 1],
-        "leadingComments": " ValidatorConfigContract holds the data for a validator configuration transaction\n",
+        "span": [153, 0, 162, 1],
+        "leadingComments": " ValidatorConfig holds the data for a validator configuration\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 12],
-        "span": [140, 0, 143, 1],
-        "leadingComments": " FreezeContract holds the data for a freeze transaction\n",
+        "span": [165, 0, 168, 1],
+        "leadingComments": " CreateValidatorContract holds the data for create a validator\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 13],
-        "span": [146, 0, 149, 1],
-        "leadingComments": " UnfreezeContract holds the data for a unfreeze transaction\n",
+        "span": [171, 0, 173, 1],
+        "leadingComments": " ValidatorConfigContract holds the data for a validator configuration transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 14],
-        "span": [152, 0, 155, 1],
-        "leadingComments": " DelegateContract holds the data for a delegate transaction\n",
+        "span": [176, 0, 179, 1],
+        "leadingComments": " FreezeContract holds the data for a freeze transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 15],
-        "span": [158, 0, 160, 1],
-        "leadingComments": " UndelegateContract holds the data for a undelegate transaction\n",
+        "span": [182, 0, 185, 1],
+        "leadingComments": " UnfreezeContract holds the data for a unfreeze transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 16],
-        "span": [163, 0, 165, 1],
-        "leadingComments": " WithdrawContract holds the data for a withdraw transaction\n",
+        "span": [188, 0, 191, 1],
+        "leadingComments": " DelegateContract holds the data for a delegate transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 17],
-        "span": [168, 0, 176, 1],
-        "leadingComments": " ClaimContract holds the data for a claim transaction\n",
+        "span": [194, 0, 196, 1],
+        "leadingComments": " UndelegateContract holds the data for a undelegate transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 18],
-        "span": [179, 0, 25],
-        "leadingComments": " UnjailContract holds the data for a unjail transaction\n",
+        "span": [199, 0, 208, 1],
+        "leadingComments": " WithdrawContract holds the data for a withdraw transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 19],
-        "span": [182, 0, 184, 1],
-        "leadingComments": " SetAccountNameContract holds the data for a setAccountName transaction\n",
+        "span": [211, 0, 219, 1],
+        "leadingComments": " ClaimContract holds the data for a claim transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 20],
-        "span": [187, 0, 191, 1],
-        "leadingComments": " ProposalContract holds the data for a proposal transaction\n",
+        "span": [222, 0, 25],
+        "leadingComments": " UnjailContract holds the data for a unjail transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 21],
-        "span": [194, 0, 202, 1],
-        "leadingComments": " VoteContract holds the data for a vote transaction\n",
+        "span": [225, 0, 227, 1],
+        "leadingComments": " SetAccountNameContract holds the data for a setAccountName transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 22],
-        "span": [205, 0, 216, 1],
-        "leadingComments": " ConfigITOContract holds the data for a ConfigITO transaction\n",
+        "span": [230, 0, 234, 1],
+        "leadingComments": " ProposalContract holds the data for a proposal transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 23],
-        "span": [219, 0, 222, 1],
-        "leadingComments": " SetITOPrices holds the data for a ConfigITO transaction\n",
+        "span": [237, 0, 245, 1],
+        "leadingComments": " VoteContract holds the data for a vote transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 24],
-        "span": [225, 0, 227, 1],
-        "leadingComments": " PackInfo holds the pack list structure for the ITO contract\n",
-        "trailingComments": "",
-        "leadingDetachedComments": [],
-      }, {
-        "path": [4, 25],
-        "span": [230, 0, 233, 1],
-        "leadingComments": " PackItem hold the pack structure for the ITO contract\n",
+        "span": [248, 0, 266, 1],
+        "leadingComments": " ConfigITOContract holds the data for a ConfigITO transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 26],
-        "span": [236, 0, 245, 1],
-        "leadingComments": " BuyContract holds the data for a buy transaction\n",
+        "span": [273, 0, 276, 1],
+        "leadingComments": " SetITOPrices holds the data for a ConfigITO transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 27],
-        "span": [248, 0, 260, 1],
-        "leadingComments": " SellContract holds the data for a sell transaction\n",
+        "span": [279, 0, 310, 1],
+        "leadingComments": " ITOTriggerContract triggers assets functions\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 28],
-        "span": [263, 0, 265, 1],
-        "leadingComments": " CancelMarketOrderContract holds the data for a cancel market transaction\n",
+        "span": [313, 0, 315, 1],
+        "leadingComments": " PackInfo holds the pack list structure for the ITO contract\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 29],
-        "span": [268, 0, 272, 1],
-        "leadingComments": " CreateMarketplaceContract holds the data for a create marketplace transaction\n",
+        "span": [318, 0, 321, 1],
+        "leadingComments": " PackItem hold the pack structure for the ITO contract\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 30],
-        "span": [275, 0, 280, 1],
-        "leadingComments": " ConfigMarketplaceContract holds the data for a config marketplace transaction\n",
+        "span": [324, 0, 333, 1],
+        "leadingComments": " BuyContract holds the data for a buy transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 31],
-        "span": [283, 0, 286, 1],
-        "leadingComments": " TODO: Reuse from account\n",
+        "span": [336, 0, 348, 1],
+        "leadingComments": " SellContract holds the data for a sell transaction\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 32],
+        "span": [351, 0, 353, 1],
+        "leadingComments": " CancelMarketOrderContract holds the data for a cancel market transaction\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 33],
-        "span": [301, 0, 303, 1],
+        "span": [356, 0, 360, 1],
+        "leadingComments": " CreateMarketplaceContract holds the data for a create marketplace transaction\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 34],
+        "span": [363, 0, 368, 1],
+        "leadingComments": " ConfigMarketplaceContract holds the data for a config marketplace transaction\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 35],
+        "span": [371, 0, 374, 1],
+        "leadingComments": " TODO: Reuse from account\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 37],
+        "span": [389, 0, 391, 1],
         "leadingComments":
           " UpdateAccountPermissionContract holds the data for update account permission transaction\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 38],
+        "span": [394, 0, 403, 1],
+        "leadingComments": " DepositContract holds the data for a deposit transaction\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 40, 2, 2],
+        "span": [420, 4, 41],
+        "leadingComments":
+          " SmartContract CallValue is represented by a map of currencyID and amount\n  should be limited to 50 currencies\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }],
@@ -6054,7 +8768,10 @@ export const protoMetadata: ProtoMetadata = {
     ".proto.StakingInfo.InterestType": StakingInfo_InterestType,
     ".proto.RolesInfo": RolesInfo,
     ".proto.RoyaltiesInfo": RoyaltiesInfo,
+    ".proto.RoyaltiesInfo.SplitRoyaltiesEntry": RoyaltiesInfo_SplitRoyaltiesEntry,
+    ".proto.RoyaltySplitInfo": RoyaltySplitInfo,
     ".proto.RoyaltyInfo": RoyaltyInfo,
+    ".proto.KDAPoolInfo": KDAPoolInfo,
     ".proto.AssetTriggerContract": AssetTriggerContract,
     ".proto.AssetTriggerContract.EnumTriggerType": AssetTriggerContract_EnumTriggerType,
     ".proto.AssetTriggerContract.URIsEntry": AssetTriggerContract_URIsEntry,
@@ -6067,6 +8784,7 @@ export const protoMetadata: ProtoMetadata = {
     ".proto.DelegateContract": DelegateContract,
     ".proto.UndelegateContract": UndelegateContract,
     ".proto.WithdrawContract": WithdrawContract,
+    ".proto.WithdrawContract.EnumWithdrawType": WithdrawContract_EnumWithdrawType,
     ".proto.ClaimContract": ClaimContract,
     ".proto.ClaimContract.EnumClaimType": ClaimContract_EnumClaimType,
     ".proto.UnjailContract": UnjailContract,
@@ -6078,8 +8796,15 @@ export const protoMetadata: ProtoMetadata = {
     ".proto.ConfigITOContract": ConfigITOContract,
     ".proto.ConfigITOContract.EnumITOStatus": ConfigITOContract_EnumITOStatus,
     ".proto.ConfigITOContract.PackInfoEntry": ConfigITOContract_PackInfoEntry,
+    ".proto.ConfigITOContract.WhitelistInfoEntry": ConfigITOContract_WhitelistInfoEntry,
+    ".proto.WhitelistInfo": WhitelistInfo,
     ".proto.SetITOPricesContract": SetITOPricesContract,
     ".proto.SetITOPricesContract.PackInfoEntry": SetITOPricesContract_PackInfoEntry,
+    ".proto.ITOTriggerContract": ITOTriggerContract,
+    ".proto.ITOTriggerContract.EnumITOTriggerType": ITOTriggerContract_EnumITOTriggerType,
+    ".proto.ITOTriggerContract.EnumITOStatus": ITOTriggerContract_EnumITOStatus,
+    ".proto.ITOTriggerContract.PackInfoEntry": ITOTriggerContract_PackInfoEntry,
+    ".proto.ITOTriggerContract.WhitelistInfoEntry": ITOTriggerContract_WhitelistInfoEntry,
     ".proto.PackInfo": PackInfo,
     ".proto.PackItem": PackItem,
     ".proto.BuyContract": BuyContract,
@@ -6093,6 +8818,12 @@ export const protoMetadata: ProtoMetadata = {
     ".proto.AccPermission": AccPermission,
     ".proto.AccPermission.AccPermissionType": AccPermission_AccPermissionType,
     ".proto.UpdateAccountPermissionContract": UpdateAccountPermissionContract,
+    ".proto.DepositContract": DepositContract,
+    ".proto.DepositContract.EnumDepositType": DepositContract_EnumDepositType,
+    ".proto.CallValue": CallValue,
+    ".proto.SmartContract": SmartContract,
+    ".proto.SmartContract.SCType": SmartContract_SCType,
+    ".proto.SmartContract.CallValueEntry": SmartContract_CallValueEntry,
   },
   dependencies: [],
 };

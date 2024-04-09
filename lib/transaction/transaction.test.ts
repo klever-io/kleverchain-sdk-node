@@ -117,6 +117,8 @@ describe("Transaction", () => {
       ResultCode: 0,
       Receipts: [],
       Block: 0,
+      GasLimit: 0,
+      GasMultiplier: 0,
     };
 
     const tx = new Transaction();
