@@ -36,6 +36,9 @@ export enum TXContract_ContractType {
   CreateMarketplaceContractType = 20,
   ConfigMarketplaceContractType = 21,
   UpdateAccountPermissionContractType = 22,
+  DepositContractType = 23,
+  ITOTriggerContractType = 24,
+  SmartContractType = 99,
   UNRECOGNIZED = -1,
 }
 
@@ -110,6 +113,15 @@ export function tXContract_ContractTypeFromJSON(object: any): TXContract_Contrac
     case 22:
     case "UpdateAccountPermissionContractType":
       return TXContract_ContractType.UpdateAccountPermissionContractType;
+    case 23:
+    case "DepositContractType":
+      return TXContract_ContractType.DepositContractType;
+    case 24:
+    case "ITOTriggerContractType":
+      return TXContract_ContractType.ITOTriggerContractType;
+    case 99:
+    case "SmartContractType":
+      return TXContract_ContractType.SmartContractType;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -165,6 +177,12 @@ export function tXContract_ContractTypeToJSON(object: TXContract_ContractType): 
       return 21;
     case TXContract_ContractType.UpdateAccountPermissionContractType:
       return 22;
+    case TXContract_ContractType.DepositContractType:
+      return 23;
+    case TXContract_ContractType.ITOTriggerContractType:
+      return 24;
+    case TXContract_ContractType.SmartContractType:
+      return 99;
     case TXContract_ContractType.UNRECOGNIZED:
     default:
       return -1;
@@ -179,6 +197,8 @@ export interface Transaction {
   ResultCode?: Transaction_TXResultCode;
   Receipts?: Transaction_Receipt[];
   Block?: number;
+  GasLimit?: number;
+  GasMultiplier?: number;
 }
 
 export enum Transaction_TXResult {
@@ -216,10 +236,12 @@ export function transaction_TXResultToJSON(object: Transaction_TXResult): number
 
 export enum Transaction_TXResultCode {
   Ok = 0,
+  /** OutOfFunds - OutOfFunds is returned when the caller (sender) runs out of funds. */
   OutOfFunds = 1,
   AccountError = 2,
   AssetError = 3,
   ContractInvalid = 4,
+  /** ContractNotFound - ContractNotFound is returned when the called contract does not exist. */
   ContractNotFound = 5,
   FeeInvalid = 6,
   ParameterInvalid = 7,
@@ -242,7 +264,7 @@ export enum Transaction_TXResultCode {
   MaxDelegationAmount = 24,
   InvalidPeerKey = 25,
   MinKFIStakedUnreached = 26,
-  MaxSupplyExeeced = 27,
+  MaxSupplyExceeded = 27,
   SaveAccountError = 28,
   LoadAccountError = 29,
   SameAccountError = 30,
@@ -258,10 +280,40 @@ export enum Transaction_TXResultCode {
   UndeletegateError = 40,
   WithdrawError = 41,
   ClaimError = 42,
-  BucketsExceded = 43,
+  BucketsExceeded = 43,
   AssetCantBeWiped = 44,
   AssetCantAddRoles = 45,
   FreezeError = 46,
+  ITONotActive = 47,
+  NFTMintStopped = 48,
+  RoyaltiesChangeStopped = 49,
+  ITOKAPPError = 50,
+  ITOWhiteListError = 51,
+  NFTMetadataChangeStopped = 52,
+  AlreadyExists = 53,
+  IteratorLimitReached = 54,
+  /** VMFunctionNotFound - FunctionNotFound is returned when the input specifies a function name that does not exist or is not public. */
+  VMFunctionNotFound = 55,
+  /** VMFunctionWrongSignature - FunctionWrongSignature is returned when the wrong number of arguments is provided. */
+  VMFunctionWrongSignature = 56,
+  /** VMUserError - UserError is returned for various execution errors. */
+  VMUserError = 57,
+  /** VMOutOfGas - OutOfGas is returned when VM execution runs out of gas. */
+  VMOutOfGas = 58,
+  /** VMAccountCollision - AccountCollision is returned when created account already exists. */
+  VMAccountCollision = 59,
+  /** VMCallStackOverFlow - CallStackOverFlow is returned when stack overflow occurs. */
+  VMCallStackOverFlow = 60,
+  /** VMExecutionPanicked - Execution Panicked */
+  VMExecutionPanicked = 61,
+  /** VMExecutionFailed - ExecutionFailed is returned when the execution of the specified function has failed. */
+  VMExecutionFailed = 62,
+  /** VMUpgradeFailed - UpgradeFailed is returned when the upgrade of the contract has failed */
+  VMUpgradeFailed = 63,
+  /** VMSimulateFailed - SimulateFailed is returned when tx simulation fails execution */
+  VMSimulateFailed = 64,
+  /** KDATransferNotAllowed - KDA Transfer not allowed */
+  KDATransferNotAllowed = 65,
   Fail = 99,
   UNRECOGNIZED = -1,
 }
@@ -350,8 +402,8 @@ export function transaction_TXResultCodeFromJSON(object: any): Transaction_TXRes
     case "MinKFIStakedUnreached":
       return Transaction_TXResultCode.MinKFIStakedUnreached;
     case 27:
-    case "MaxSupplyExeeced":
-      return Transaction_TXResultCode.MaxSupplyExeeced;
+    case "MaxSupplyExceeded":
+      return Transaction_TXResultCode.MaxSupplyExceeded;
     case 28:
     case "SaveAccountError":
       return Transaction_TXResultCode.SaveAccountError;
@@ -398,8 +450,8 @@ export function transaction_TXResultCodeFromJSON(object: any): Transaction_TXRes
     case "ClaimError":
       return Transaction_TXResultCode.ClaimError;
     case 43:
-    case "BucketsExceded":
-      return Transaction_TXResultCode.BucketsExceded;
+    case "BucketsExceeded":
+      return Transaction_TXResultCode.BucketsExceeded;
     case 44:
     case "AssetCantBeWiped":
       return Transaction_TXResultCode.AssetCantBeWiped;
@@ -409,6 +461,63 @@ export function transaction_TXResultCodeFromJSON(object: any): Transaction_TXRes
     case 46:
     case "FreezeError":
       return Transaction_TXResultCode.FreezeError;
+    case 47:
+    case "ITONotActive":
+      return Transaction_TXResultCode.ITONotActive;
+    case 48:
+    case "NFTMintStopped":
+      return Transaction_TXResultCode.NFTMintStopped;
+    case 49:
+    case "RoyaltiesChangeStopped":
+      return Transaction_TXResultCode.RoyaltiesChangeStopped;
+    case 50:
+    case "ITOKAPPError":
+      return Transaction_TXResultCode.ITOKAPPError;
+    case 51:
+    case "ITOWhiteListError":
+      return Transaction_TXResultCode.ITOWhiteListError;
+    case 52:
+    case "NFTMetadataChangeStopped":
+      return Transaction_TXResultCode.NFTMetadataChangeStopped;
+    case 53:
+    case "AlreadyExists":
+      return Transaction_TXResultCode.AlreadyExists;
+    case 54:
+    case "IteratorLimitReached":
+      return Transaction_TXResultCode.IteratorLimitReached;
+    case 55:
+    case "VMFunctionNotFound":
+      return Transaction_TXResultCode.VMFunctionNotFound;
+    case 56:
+    case "VMFunctionWrongSignature":
+      return Transaction_TXResultCode.VMFunctionWrongSignature;
+    case 57:
+    case "VMUserError":
+      return Transaction_TXResultCode.VMUserError;
+    case 58:
+    case "VMOutOfGas":
+      return Transaction_TXResultCode.VMOutOfGas;
+    case 59:
+    case "VMAccountCollision":
+      return Transaction_TXResultCode.VMAccountCollision;
+    case 60:
+    case "VMCallStackOverFlow":
+      return Transaction_TXResultCode.VMCallStackOverFlow;
+    case 61:
+    case "VMExecutionPanicked":
+      return Transaction_TXResultCode.VMExecutionPanicked;
+    case 62:
+    case "VMExecutionFailed":
+      return Transaction_TXResultCode.VMExecutionFailed;
+    case 63:
+    case "VMUpgradeFailed":
+      return Transaction_TXResultCode.VMUpgradeFailed;
+    case 64:
+    case "VMSimulateFailed":
+      return Transaction_TXResultCode.VMSimulateFailed;
+    case 65:
+    case "KDATransferNotAllowed":
+      return Transaction_TXResultCode.KDATransferNotAllowed;
     case 99:
     case "Fail":
       return Transaction_TXResultCode.Fail;
@@ -475,7 +584,7 @@ export function transaction_TXResultCodeToJSON(object: Transaction_TXResultCode)
       return 25;
     case Transaction_TXResultCode.MinKFIStakedUnreached:
       return 26;
-    case Transaction_TXResultCode.MaxSupplyExeeced:
+    case Transaction_TXResultCode.MaxSupplyExceeded:
       return 27;
     case Transaction_TXResultCode.SaveAccountError:
       return 28;
@@ -507,7 +616,7 @@ export function transaction_TXResultCodeToJSON(object: Transaction_TXResultCode)
       return 41;
     case Transaction_TXResultCode.ClaimError:
       return 42;
-    case Transaction_TXResultCode.BucketsExceded:
+    case Transaction_TXResultCode.BucketsExceeded:
       return 43;
     case Transaction_TXResultCode.AssetCantBeWiped:
       return 44;
@@ -515,12 +624,56 @@ export function transaction_TXResultCodeToJSON(object: Transaction_TXResultCode)
       return 45;
     case Transaction_TXResultCode.FreezeError:
       return 46;
+    case Transaction_TXResultCode.ITONotActive:
+      return 47;
+    case Transaction_TXResultCode.NFTMintStopped:
+      return 48;
+    case Transaction_TXResultCode.RoyaltiesChangeStopped:
+      return 49;
+    case Transaction_TXResultCode.ITOKAPPError:
+      return 50;
+    case Transaction_TXResultCode.ITOWhiteListError:
+      return 51;
+    case Transaction_TXResultCode.NFTMetadataChangeStopped:
+      return 52;
+    case Transaction_TXResultCode.AlreadyExists:
+      return 53;
+    case Transaction_TXResultCode.IteratorLimitReached:
+      return 54;
+    case Transaction_TXResultCode.VMFunctionNotFound:
+      return 55;
+    case Transaction_TXResultCode.VMFunctionWrongSignature:
+      return 56;
+    case Transaction_TXResultCode.VMUserError:
+      return 57;
+    case Transaction_TXResultCode.VMOutOfGas:
+      return 58;
+    case Transaction_TXResultCode.VMAccountCollision:
+      return 59;
+    case Transaction_TXResultCode.VMCallStackOverFlow:
+      return 60;
+    case Transaction_TXResultCode.VMExecutionPanicked:
+      return 61;
+    case Transaction_TXResultCode.VMExecutionFailed:
+      return 62;
+    case Transaction_TXResultCode.VMUpgradeFailed:
+      return 63;
+    case Transaction_TXResultCode.VMSimulateFailed:
+      return 64;
+    case Transaction_TXResultCode.KDATransferNotAllowed:
+      return 65;
     case Transaction_TXResultCode.Fail:
       return 99;
     case Transaction_TXResultCode.UNRECOGNIZED:
     default:
       return -1;
   }
+}
+
+export interface Transaction_KDAFee {
+  KDA?: Uint8Array;
+  /** TODO: allow spread */
+  Amount?: number;
 }
 
 export interface Transaction_Raw {
@@ -533,6 +686,7 @@ export interface Transaction_Raw {
   BandwidthFee?: number;
   Version?: number;
   ChainID?: Uint8Array;
+  KDAFee?: Transaction_KDAFee;
 }
 
 export interface Transaction_Receipt {
@@ -600,7 +754,16 @@ export const TXContract = {
 };
 
 function createBaseTransaction(): Transaction {
-  return { RawData: undefined, Signature: [], Result: 0, ResultCode: 0, Receipts: [], Block: 0 };
+  return {
+    RawData: undefined,
+    Signature: [],
+    Result: 0,
+    ResultCode: 0,
+    Receipts: [],
+    Block: 0,
+    GasLimit: 0,
+    GasMultiplier: 0,
+  };
 }
 
 export const Transaction = {
@@ -626,6 +789,12 @@ export const Transaction = {
     }
     if (message.Block !== undefined && message.Block !== 0) {
       writer.uint32(48).uint64(message.Block);
+    }
+    if (message.GasLimit !== undefined && message.GasLimit !== 0) {
+      writer.uint32(56).uint64(message.GasLimit);
+    }
+    if (message.GasMultiplier !== undefined && message.GasMultiplier !== 0) {
+      writer.uint32(64).uint64(message.GasMultiplier);
     }
     return writer;
   },
@@ -655,6 +824,12 @@ export const Transaction = {
         case 6:
           message.Block = longToNumber(reader.uint64() as Long);
           break;
+        case 7:
+          message.GasLimit = longToNumber(reader.uint64() as Long);
+          break;
+        case 8:
+          message.GasMultiplier = longToNumber(reader.uint64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -671,6 +846,8 @@ export const Transaction = {
       ResultCode: isSet(object.ResultCode) ? transaction_TXResultCodeFromJSON(object.ResultCode) : 0,
       Receipts: Array.isArray(object?.Receipts) ? object.Receipts.map((e: any) => Transaction_Receipt.fromJSON(e)) : [],
       Block: isSet(object.Block) ? Number(object.Block) : 0,
+      GasLimit: isSet(object.GasLimit) ? Number(object.GasLimit) : 0,
+      GasMultiplier: isSet(object.GasMultiplier) ? Number(object.GasMultiplier) : 0,
     };
   },
 
@@ -691,6 +868,8 @@ export const Transaction = {
       obj.Receipts = [];
     }
     message.Block !== undefined && (obj.Block = Math.round(message.Block));
+    message.GasLimit !== undefined && (obj.GasLimit = Math.round(message.GasLimit));
+    message.GasMultiplier !== undefined && (obj.GasMultiplier = Math.round(message.GasMultiplier));
     return obj;
   },
 
@@ -704,6 +883,67 @@ export const Transaction = {
     message.ResultCode = object.ResultCode ?? 0;
     message.Receipts = object.Receipts?.map((e) => Transaction_Receipt.fromPartial(e)) || [];
     message.Block = object.Block ?? 0;
+    message.GasLimit = object.GasLimit ?? 0;
+    message.GasMultiplier = object.GasMultiplier ?? 0;
+    return message;
+  },
+};
+
+function createBaseTransaction_KDAFee(): Transaction_KDAFee {
+  return { KDA: new Uint8Array(), Amount: 0 };
+}
+
+export const Transaction_KDAFee = {
+  encode(message: Transaction_KDAFee, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.KDA !== undefined && message.KDA.length !== 0) {
+      writer.uint32(10).bytes(message.KDA);
+    }
+    if (message.Amount !== undefined && message.Amount !== 0) {
+      writer.uint32(16).int64(message.Amount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Transaction_KDAFee {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTransaction_KDAFee();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.KDA = reader.bytes();
+          break;
+        case 2:
+          message.Amount = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Transaction_KDAFee {
+    return {
+      KDA: isSet(object.KDA) ? bytesFromBase64(object.KDA) : new Uint8Array(),
+      Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+    };
+  },
+
+  toJSON(message: Transaction_KDAFee): unknown {
+    const obj: any = {};
+    message.KDA !== undefined &&
+      (obj.KDA = base64FromBytes(message.KDA !== undefined ? message.KDA : new Uint8Array()));
+    message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<Transaction_KDAFee>, I>>(object: I): Transaction_KDAFee {
+    const message = createBaseTransaction_KDAFee();
+    message.KDA = object.KDA ?? new Uint8Array();
+    message.Amount = object.Amount ?? 0;
     return message;
   },
 };
@@ -719,6 +959,7 @@ function createBaseTransaction_Raw(): Transaction_Raw {
     BandwidthFee: 0,
     Version: 0,
     ChainID: new Uint8Array(),
+    KDAFee: undefined,
   };
 }
 
@@ -754,6 +995,9 @@ export const Transaction_Raw = {
     }
     if (message.ChainID !== undefined && message.ChainID.length !== 0) {
       writer.uint32(130).bytes(message.ChainID);
+    }
+    if (message.KDAFee !== undefined) {
+      Transaction_KDAFee.encode(message.KDAFee, writer.uint32(138).fork()).ldelim();
     }
     return writer;
   },
@@ -792,6 +1036,9 @@ export const Transaction_Raw = {
         case 16:
           message.ChainID = reader.bytes();
           break;
+        case 17:
+          message.KDAFee = Transaction_KDAFee.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -811,6 +1058,7 @@ export const Transaction_Raw = {
       BandwidthFee: isSet(object.BandwidthFee) ? Number(object.BandwidthFee) : 0,
       Version: isSet(object.Version) ? Number(object.Version) : 0,
       ChainID: isSet(object.ChainID) ? bytesFromBase64(object.ChainID) : new Uint8Array(),
+      KDAFee: isSet(object.KDAFee) ? Transaction_KDAFee.fromJSON(object.KDAFee) : undefined,
     };
   },
 
@@ -835,6 +1083,8 @@ export const Transaction_Raw = {
     message.Version !== undefined && (obj.Version = Math.round(message.Version));
     message.ChainID !== undefined &&
       (obj.ChainID = base64FromBytes(message.ChainID !== undefined ? message.ChainID : new Uint8Array()));
+    message.KDAFee !== undefined &&
+      (obj.KDAFee = message.KDAFee ? Transaction_KDAFee.toJSON(message.KDAFee) : undefined);
     return obj;
   },
 
@@ -849,6 +1099,9 @@ export const Transaction_Raw = {
     message.BandwidthFee = object.BandwidthFee ?? 0;
     message.Version = object.Version ?? 0;
     message.ChainID = object.ChainID ?? new Uint8Array();
+    message.KDAFee = (object.KDAFee !== undefined && object.KDAFee !== null)
+      ? Transaction_KDAFee.fromPartial(object.KDAFee)
+      : undefined;
     return message;
   },
 };
@@ -886,15 +1139,15 @@ export const Transaction_Receipt = {
   },
 
   fromJSON(object: any): Transaction_Receipt {
-    return { Data: Array.isArray(object?.data) ? object.data.map((e: any) => bytesFromBase64(e)) : [] };
+    return { Data: Array.isArray(object?.Data) ? object.Data.map((e: any) => bytesFromBase64(e)) : [] };
   },
 
   toJSON(message: Transaction_Receipt): unknown {
     const obj: any = {};
     if (message.Data) {
-      obj.data = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
+      obj.Data = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
     } else {
-      obj.data = [];
+      obj.Data = [];
     }
     return obj;
   },
@@ -989,6 +1242,9 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "CreateMarketplaceContractType", "number": 20, "options": undefined },
           { "name": "ConfigMarketplaceContractType", "number": 21, "options": undefined },
           { "name": "UpdateAccountPermissionContractType", "number": 22, "options": undefined },
+          { "name": "DepositContractType", "number": 23, "options": undefined },
+          { "name": "ITOTriggerContractType", "number": 24, "options": undefined },
+          { "name": "SmartContractType", "number": 99, "options": undefined },
         ],
         "options": undefined,
         "reservedRange": [],
@@ -1073,9 +1329,68 @@ export const protoMetadata: ProtoMetadata = {
         "jsonName": "Block",
         "options": undefined,
         "proto3Optional": false,
+      }, {
+        "name": "GasLimit",
+        "number": 7,
+        "label": 1,
+        "type": 4,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "GasLimit",
+        "options": undefined,
+        "proto3Optional": false,
+      }, {
+        "name": "GasMultiplier",
+        "number": 8,
+        "label": 1,
+        "type": 4,
+        "typeName": "",
+        "extendee": "",
+        "defaultValue": "",
+        "oneofIndex": 0,
+        "jsonName": "GasMultiplier",
+        "options": undefined,
+        "proto3Optional": false,
       }],
       "extension": [],
       "nestedType": [{
+        "name": "KDAFee",
+        "field": [{
+          "name": "KDA",
+          "number": 1,
+          "label": 1,
+          "type": 12,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "KDA",
+          "options": undefined,
+          "proto3Optional": false,
+        }, {
+          "name": "Amount",
+          "number": 2,
+          "label": 1,
+          "type": 3,
+          "typeName": "",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "Amount",
+          "options": undefined,
+          "proto3Optional": false,
+        }],
+        "extension": [],
+        "nestedType": [],
+        "enumType": [],
+        "extensionRange": [],
+        "oneofDecl": [],
+        "options": undefined,
+        "reservedRange": [],
+        "reservedName": [],
+      }, {
         "name": "Raw",
         "field": [{
           "name": "Nonce",
@@ -1185,6 +1500,18 @@ export const protoMetadata: ProtoMetadata = {
           "jsonName": "ChainID",
           "options": undefined,
           "proto3Optional": false,
+        }, {
+          "name": "KDAFee",
+          "number": 17,
+          "label": 1,
+          "type": 11,
+          "typeName": ".proto.Transaction.KDAFee",
+          "extendee": "",
+          "defaultValue": "",
+          "oneofIndex": 0,
+          "jsonName": "KDAFee",
+          "options": undefined,
+          "proto3Optional": false,
         }],
         "extension": [],
         "nestedType": [],
@@ -1205,7 +1532,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "data",
+          "jsonName": "Data",
           "options": undefined,
           "proto3Optional": false,
         }],
@@ -1258,7 +1585,7 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "MaxDelegationAmount", "number": 24, "options": undefined },
           { "name": "InvalidPeerKey", "number": 25, "options": undefined },
           { "name": "MinKFIStakedUnreached", "number": 26, "options": undefined },
-          { "name": "MaxSupplyExeeced", "number": 27, "options": undefined },
+          { "name": "MaxSupplyExceeded", "number": 27, "options": undefined },
           { "name": "SaveAccountError", "number": 28, "options": undefined },
           { "name": "LoadAccountError", "number": 29, "options": undefined },
           { "name": "SameAccountError", "number": 30, "options": undefined },
@@ -1274,10 +1601,29 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "UndeletegateError", "number": 40, "options": undefined },
           { "name": "WithdrawError", "number": 41, "options": undefined },
           { "name": "ClaimError", "number": 42, "options": undefined },
-          { "name": "BucketsExceded", "number": 43, "options": undefined },
+          { "name": "BucketsExceeded", "number": 43, "options": undefined },
           { "name": "AssetCantBeWiped", "number": 44, "options": undefined },
           { "name": "AssetCantAddRoles", "number": 45, "options": undefined },
           { "name": "FreezeError", "number": 46, "options": undefined },
+          { "name": "ITONotActive", "number": 47, "options": undefined },
+          { "name": "NFTMintStopped", "number": 48, "options": undefined },
+          { "name": "RoyaltiesChangeStopped", "number": 49, "options": undefined },
+          { "name": "ITOKAPPError", "number": 50, "options": undefined },
+          { "name": "ITOWhiteListError", "number": 51, "options": undefined },
+          { "name": "NFTMetadataChangeStopped", "number": 52, "options": undefined },
+          { "name": "AlreadyExists", "number": 53, "options": undefined },
+          { "name": "IteratorLimitReached", "number": 54, "options": undefined },
+          { "name": "VMFunctionNotFound", "number": 55, "options": undefined },
+          { "name": "VMFunctionWrongSignature", "number": 56, "options": undefined },
+          { "name": "VMUserError", "number": 57, "options": undefined },
+          { "name": "VMOutOfGas", "number": 58, "options": undefined },
+          { "name": "VMAccountCollision", "number": 59, "options": undefined },
+          { "name": "VMCallStackOverFlow", "number": 60, "options": undefined },
+          { "name": "VMExecutionPanicked", "number": 61, "options": undefined },
+          { "name": "VMExecutionFailed", "number": 62, "options": undefined },
+          { "name": "VMUpgradeFailed", "number": 63, "options": undefined },
+          { "name": "VMSimulateFailed", "number": 64, "options": undefined },
+          { "name": "KDATransferNotAllowed", "number": 65, "options": undefined },
           { "name": "Fail", "number": 99, "options": undefined },
         ],
         "options": undefined,
@@ -1319,15 +1665,100 @@ export const protoMetadata: ProtoMetadata = {
     "sourceCodeInfo": {
       "location": [{
         "path": [4, 0],
-        "span": [9, 0, 37, 1],
+        "span": [9, 0, 41, 1],
         "leadingComments": " TXContract available\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 1],
-        "span": [40, 0, 119, 1],
+        "span": [44, 0, 166, 1],
         "leadingComments": " Transaction holds all the data needed for a value transfer\n",
         "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 1],
+        "span": [53, 8, 37],
+        "leadingComments": " OutOfFunds is returned when the caller (sender) runs out of funds.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 5],
+        "span": [58, 8, 37],
+        "leadingComments": " ContractNotFound is returned when the called contract does not exist.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 55],
+        "span": [109, 8, 40],
+        "leadingComments":
+          " FunctionNotFound is returned when the input specifies a function name that does not exist or is not public.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 56],
+        "span": [111, 8, 40],
+        "leadingComments": " FunctionWrongSignature is returned when the wrong number of arguments is provided.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 57],
+        "span": [113, 8, 40],
+        "leadingComments": " UserError is returned for various execution errors.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 58],
+        "span": [115, 8, 40],
+        "leadingComments": " OutOfGas is returned when VM execution runs out of gas.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 59],
+        "span": [117, 8, 40],
+        "leadingComments": " AccountCollision is returned when created account already exists.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 60],
+        "span": [119, 8, 40],
+        "leadingComments": " CallStackOverFlow is returned when stack overflow occurs.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 61],
+        "span": [121, 8, 40],
+        "leadingComments": " Execution Panicked\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 62],
+        "span": [123, 8, 40],
+        "leadingComments": " ExecutionFailed is returned when the execution of the specified function has failed.\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 63],
+        "span": [125, 8, 40],
+        "leadingComments": " UpgradeFailed is returned when the upgrade of the contract has failed\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 64],
+        "span": [127, 8, 40],
+        "leadingComments": " SimulateFailed is returned when tx simulation fails execution\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 4, 1, 2, 65],
+        "span": [129, 8, 40],
+        "leadingComments": " KDA Transfer not allowed\n",
+        "trailingComments": "",
+        "leadingDetachedComments": [],
+      }, {
+        "path": [4, 1, 3, 0, 2, 1],
+        "span": [137, 8, 36],
+        "leadingComments": "",
+        "trailingComments": " TODO: allow spread\n",
         "leadingDetachedComments": [],
       }],
     },
@@ -1339,6 +1770,7 @@ export const protoMetadata: ProtoMetadata = {
     ".proto.Transaction": Transaction,
     ".proto.Transaction.TXResult": Transaction_TXResult,
     ".proto.Transaction.TXResultCode": Transaction_TXResultCode,
+    ".proto.Transaction.KDAFee": Transaction_KDAFee,
     ".proto.Transaction.Raw": Transaction_Raw,
     ".proto.Transaction.Receipt": Transaction_Receipt,
   },

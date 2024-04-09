@@ -1,27 +1,22 @@
-import utils from "../utils"
-import * as Contracts from './proto/contracts'
+import utils from "../utils";
+import * as Contracts from "./proto/contracts";
 import * as proto from "./../../google/protobuf/any";
-import { 
-  Transaction as T,
-  TXContract_ContractType,
-} from './proto/transaction'
-
+import { Transaction as T, TXContract_ContractType } from "./proto/transaction";
 
 const enc = new TextDecoder();
 
 const decodeTransferContract = (wired: Uint8Array): any => {
-  const contract = Contracts.TransferContract.decode(wired)
+  const contract = Contracts.TransferContract.decode(wired);
 
   return {
     ToAddress: utils.encodeAddress(contract.ToAddress!),
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     Amount: contract.Amount,
   };
-}
-
+};
 
 const decodeCreateAssetContract = (wired: Uint8Array): any => {
-  const contract = Contracts.CreateAssetContract.decode(wired)
+  const contract = Contracts.CreateAssetContract.decode(wired);
 
   return {
     Type: contract.Type,
@@ -34,33 +29,34 @@ const decodeCreateAssetContract = (wired: Uint8Array): any => {
     InitialSupply: contract.InitialSupply,
     MaxSupply: contract.MaxSupply,
     Royalties: {
-      Address: contract.Royalties?.Address? utils.encodeAddress(contract.Royalties.Address):"",
+      Address: contract.Royalties?.Address
+        ? utils.encodeAddress(contract.Royalties.Address)
+        : "",
       TransferPercentage: contract.Royalties?.TransferPercentage,
       TransferFixed: contract.Royalties?.TransferFixed,
       MarketPercentage: contract.Royalties?.MarketPercentage,
       MarketFixed: contract.Royalties?.MarketFixed,
     },
     Properties: contract.Properties,
-    Attributes:  contract.Attributes,
-    Staking:  contract.Staking,
-    Roles: contract.Roles?.forEach( r => {
+    Attributes: contract.Attributes,
+    Staking: contract.Staking,
+    Roles: contract.Roles?.forEach((r) => {
       return {
         Address: utils.encodeAddress(r.Address!),
         HasRoleMint: r.HasRoleMint,
         HasRoleSetITOPrices: r.HasRoleSetITOPrices,
-      }
-    })
+      };
+    }),
   };
-}
-
+};
 
 const decodeCreateValidatorContract = (wired: Uint8Array): any => {
-  const contract = Contracts.CreateValidatorContract.decode(wired)
+  const contract = Contracts.CreateValidatorContract.decode(wired);
 
   return {
     OwnerAddress: utils.encodeAddress(contract.OwnerAddress!),
     Config: {
-      BLSPublicKey:  utils.toHex(contract.Config?.BLSPublicKey!),
+      BLSPublicKey: utils.toHex(contract.Config?.BLSPublicKey!),
       RewardAddress: utils.encodeAddress(contract.Config?.RewardAddress!),
       CanDelegate: contract.Config?.CanDelegate,
       Commission: contract.Config?.Commission,
@@ -70,15 +66,14 @@ const decodeCreateValidatorContract = (wired: Uint8Array): any => {
       Name: contract.Config?.Name,
     },
   };
-}
-
+};
 
 const decodeValidatorConfigContract = (wired: Uint8Array): any => {
-  const contract = Contracts.ValidatorConfigContract.decode(wired)
+  const contract = Contracts.ValidatorConfigContract.decode(wired);
 
   return {
     Config: {
-      BLSPublicKey:  utils.toHex(contract.Config?.BLSPublicKey!),
+      BLSPublicKey: utils.toHex(contract.Config?.BLSPublicKey!),
       RewardAddress: utils.encodeAddress(contract.Config?.RewardAddress!),
       CanDelegate: contract.Config?.CanDelegate,
       Commission: contract.Config?.Commission,
@@ -88,101 +83,98 @@ const decodeValidatorConfigContract = (wired: Uint8Array): any => {
       Name: contract.Config?.Name,
     },
   };
-}
-
+};
 
 const decodeFreezeContract = (wired: Uint8Array): any => {
-  const contract = Contracts.FreezeContract.decode(wired)
-  
+  const contract = Contracts.FreezeContract.decode(wired);
+
   return {
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     Amount: contract.Amount,
   };
-}
-
+};
 
 const decodeUnfreezeContractType = (wired: Uint8Array): any => {
-  const contract = Contracts.UnfreezeContract.decode(wired)
+  const contract = Contracts.UnfreezeContract.decode(wired);
 
   return {
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     BucketID: enc.decode(contract.BucketID),
   };
-}
+};
 
 const decodeDelegateContract = (wired: Uint8Array): any => {
-  const contract = Contracts.DelegateContract.decode(wired)
+  const contract = Contracts.DelegateContract.decode(wired);
 
   return {
     ToAddress: utils.encodeAddress(contract.ToAddress!),
     BucketID: enc.decode(contract.BucketID),
   };
-}
+};
 
 const decodeUndelegateContract = (wired: Uint8Array): any => {
-  const contract = Contracts.UndelegateContract.decode(wired)
+  const contract = Contracts.UndelegateContract.decode(wired);
 
   return {
     BucketID: enc.decode(contract.BucketID),
   };
-}
+};
 
 const decodeWithdrawContractType = (wired: Uint8Array): any => {
-  const contract = Contracts.WithdrawContract.decode(wired)
+  const contract = Contracts.WithdrawContract.decode(wired);
 
   return {
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
   };
-}
+};
 
 const decodeClaimContract = (wired: Uint8Array): any => {
-  const contract = Contracts.ClaimContract.decode(wired)
+  const contract = Contracts.ClaimContract.decode(wired);
 
   return {
     ClaimType: contract.ClaimType,
     ID: enc.decode(contract.ID),
   };
-}
+};
 
 const decodeUnjailContract = (wired: Uint8Array): any => {
-  const contract = Contracts.UnjailContract.decode(wired)
+  const contract = Contracts.UnjailContract.decode(wired);
 
   return {};
-}
+};
 
 const decodeAssetTriggerContract = (wired: Uint8Array): any => {
-  const contract = Contracts.AssetTriggerContract.decode(wired)
+  const contract = Contracts.AssetTriggerContract.decode(wired);
 
   return {
     TriggerType: contract.TriggerType,
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     ToAddress: utils.encodeAddress(contract.ToAddress!),
     Amount: contract.Amount,
     MIME: enc.decode(contract.MIME),
     Logo: contract.Logo,
     URIs: contract.URIs,
     Role: {
-      Address: contract.Role? utils.encodeAddress(contract.Role.Address!):"",
+      Address: contract.Role ? utils.encodeAddress(contract.Role.Address!) : "",
       HasRoleMint: contract.Role?.HasRoleMint,
       HasRoleSetITOPrices: contract.Role?.HasRoleSetITOPrices,
     },
     Staking: contract.Staking,
   };
-}
+};
 
 const decodeSetAccountNameContract = (wired: Uint8Array): any => {
-  const contract = Contracts.SetAccountNameContract.decode(wired)
+  const contract = Contracts.SetAccountNameContract.decode(wired);
 
   return {
     Name: enc.decode(contract.Name),
   };
-}
+};
 
 const decodeProposalContract = (wired: Uint8Array): any => {
-  const contract = Contracts.ProposalContract.decode(wired)
+  const contract = Contracts.ProposalContract.decode(wired);
 
-
-  const param :{[key: string]: string} = {}
+  const param: { [key: string]: string } = {};
 
   for (var a in contract.Parameters) {
     param.a = enc.decode(contract.Parameters[parseInt(a)]);
@@ -193,41 +185,41 @@ const decodeProposalContract = (wired: Uint8Array): any => {
     Description: enc.decode(contract.Description),
     EpochsDuration: contract.EpochsDuration,
   };
-}
+};
 
 const decodeVoteContract = (wired: Uint8Array): any => {
-  const contract = Contracts.VoteContract.decode(wired)
+  const contract = Contracts.VoteContract.decode(wired);
 
   return {
     ProposalID: contract.ProposalID,
     Amount: contract.Amount,
     Type: contract.Type,
   };
-}
+};
 
 const decodeConfigITOContract = (wired: Uint8Array): any => {
-  const contract = Contracts.ConfigITOContract.decode(wired)
+  const contract = Contracts.ConfigITOContract.decode(wired);
 
   return {
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     ReceiverAddress: utils.encodeAddress(contract.ReceiverAddress!),
     Status: contract.Status,
     MaxAmount: contract.MaxAmount,
     PackInfo: contract.PackInfo,
   };
-}
+};
 
 const decodeSetITOPricesContract = (wired: Uint8Array): any => {
-  const contract = Contracts.SetITOPricesContract.decode(wired)
+  const contract = Contracts.SetITOPricesContract.decode(wired);
 
   return {
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     PackInfo: contract.PackInfo,
   };
-}
+};
 
 const decodeBuyContract = (wired: Uint8Array): any => {
-  const contract = Contracts.BuyContract.decode(wired)
+  const contract = Contracts.BuyContract.decode(wired);
 
   return {
     BuyType: contract.BuyType,
@@ -235,74 +227,158 @@ const decodeBuyContract = (wired: Uint8Array): any => {
     CurrencyID: enc.decode(contract.CurrencyID),
     Amount: contract.Amount,
   };
-}
+};
 
 const decodeSellContract = (wired: Uint8Array): any => {
-  const contract = Contracts.SellContract.decode(wired)
+  const contract = Contracts.SellContract.decode(wired);
 
   return {
     MarketType: contract.MarketType,
     MarketplaceID: enc.decode(contract.MarketplaceID),
-    AssetID: contract.AssetID?.length?enc.decode(contract.AssetID):"KLV",
+    AssetID: contract.AssetID?.length ? enc.decode(contract.AssetID) : "KLV",
     CurrencyID: enc.decode(contract.CurrencyID),
     Price: contract.Price,
     ReservePrice: contract.ReservePrice,
     EndTime: contract.EndTime,
   };
-}
+};
 
 const decodeCancelMarketOrderContract = (wired: Uint8Array): any => {
-  const contract = Contracts.CancelMarketOrderContract.decode(wired)
+  const contract = Contracts.CancelMarketOrderContract.decode(wired);
 
   return {
     OrderID: enc.decode(contract.OrderID),
   };
-}
+};
 
 const decodeCreateMarketplaceContract = (wired: Uint8Array): any => {
-  const contract = Contracts.CreateMarketplaceContract.decode(wired)
+  const contract = Contracts.CreateMarketplaceContract.decode(wired);
 
   return {
     Name: enc.decode(contract.Name),
     ReferralAddress: utils.encodeAddress(contract.ReferralAddress!),
     ReferralPercentage: contract.ReferralPercentage,
   };
-}
+};
 
 const decodeConfigMarketplaceContract = (wired: Uint8Array): any => {
-  const contract = Contracts.ConfigMarketplaceContract.decode(wired)
+  const contract = Contracts.ConfigMarketplaceContract.decode(wired);
 
   return {
     MarketplaceID: enc.decode(contract.MarketplaceID),
     Name: enc.decode(contract.Name),
     ReferralAddress: utils.encodeAddress(contract.ReferralAddress!),
-    ReferralPercentage: contract.ReferralPercentage
+    ReferralPercentage: contract.ReferralPercentage,
   };
-}
+};
 
 const decodeUpdateAccountPermissionContract = (wired: Uint8Array): any => {
-  const contract = Contracts.UpdateAccountPermissionContract.decode(wired)
+  const contract = Contracts.UpdateAccountPermissionContract.decode(wired);
 
   return {
-    Permissions: contract.Permissions?.forEach( p => {
+    Permissions: contract.Permissions?.forEach((p) => {
       return {
         Type: p.Type,
         PermissionName: p.PermissionName,
         Threshold: p.Threshold,
         Operations: utils.toHex(p.Operations!),
-        Signers: p.Signers?.forEach( s => {
+        Signers: p.Signers?.forEach((s) => {
           return {
             address: utils.encodeAddress(s.address!),
             weight: s.weight,
-          }
-        })
-      }
-    })
+          };
+        }),
+      };
+    }),
   };
-}
+};
 
+const decodeDepositContract = (wired: Uint8Array): any => {
+  const contract = Contracts.DepositContract.decode(wired);
 
-export const decodeContract = (type?: TXContract_ContractType, contract?: proto.Any): any =>  {
+  return {
+    DepositType: contract.DepositType,
+    ID: enc.decode(contract.ID),
+    CurrencyID: contract.CurrencyID?.length
+      ? enc.decode(contract.CurrencyID)
+      : "KLV",
+    Amount: contract.Amount,
+  };
+};
+
+const decodeITOTriggerContract = (wired: Uint8Array): any => {
+  const contract = Contracts.ITOTriggerContract.decode(wired);
+
+  let packInfos: { [key: string]: any } = {};
+  let whitelistInfos: { [key: string]: any } = {};
+
+  const packKeys = Object.keys(contract.PackInfo ?? {});
+  const whitelistKeys = Object.keys(contract.WhitelistInfo ?? {});
+
+  packKeys.forEach((key) => {
+    const value = contract.PackInfo![key];
+
+    packInfos[key] = value.Packs?.forEach((p) => {
+      return {
+        Amount: p.Amount,
+        Price: p.Price,
+      };
+    });
+  });
+
+  whitelistKeys.forEach((key) => {
+    const value = contract.WhitelistInfo![key];
+
+    whitelistInfos[key] = {
+      Limit: value.Limit,
+    };
+  });
+
+  return {
+    TriggerType: contract.TriggerType,
+    AssetID: enc.decode(contract.AssetID),
+    ReceiverAddress: utils.encodeAddress(contract.ReceiverAddress!),
+    Status: contract.Status,
+    MaxAmount: contract.MaxAmount,
+    DefaultLimitPerAddress: contract.DefaultLimitPerAddress,
+    WhitelistStatus: contract.WhitelistStatus,
+    WhitelistStartTime: contract.WhitelistStartTime,
+    WhitelistEndTime: contract.WhitelistEndTime,
+    StartTime: contract.StartTime,
+    EndTime: contract.EndTime,
+    WhitelistInfo: whitelistInfos,
+    PackInfo: packInfos,
+  };
+};
+
+const decodeSmartContract = (wired: Uint8Array): any => {
+  const contract = Contracts.SmartContract.decode(wired);
+
+  const keys = Object.keys(contract.CallValue ?? {});
+
+  let callValues: { [key: string]: any } = {};
+
+  keys.forEach((key) => {
+    const value = contract.CallValue![key];
+
+    callValues[key] = {
+      Amount: value.Amount,
+      KDARoyalties: value.KDARoyalties,
+      KLVRoyalties: value.KLVRoyalties,
+    };
+  });
+
+  return {
+    Type: contract.Type,
+    Address: contract.Address ? utils.encodeAddress(contract.Address) : "",
+    CallValue: callValues,
+  };
+};
+
+export const decodeContract = (
+  type?: TXContract_ContractType,
+  contract?: proto.Any
+): any => {
   switch (type) {
     case TXContract_ContractType.TransferContractType:
       return decodeTransferContract(contract!.value!);
@@ -350,7 +426,13 @@ export const decodeContract = (type?: TXContract_ContractType, contract?: proto.
       return decodeConfigMarketplaceContract(contract!.value!);
     case TXContract_ContractType.UpdateAccountPermissionContractType:
       return decodeUpdateAccountPermissionContract(contract!.value!);
+    case TXContract_ContractType.DepositContractType:
+      return decodeDepositContract(contract!.value!);
+    case TXContract_ContractType.ITOTriggerContractType:
+      return decodeITOTriggerContract(contract!.value!);
+    case TXContract_ContractType.SmartContractType:
+      return decodeSmartContract(contract!.value!);
     default:
-      throw("invalid transaction type");
+      throw "invalid transaction type";
   }
-}
+};

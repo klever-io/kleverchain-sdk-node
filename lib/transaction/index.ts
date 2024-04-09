@@ -250,6 +250,18 @@ const anyMarshal = (
         Contracts.UpdateAccountPermissionContract.encode(contract).finish();
       type_url += "UpdateAccountPermissionContract";
       break;
+    case TXContract_ContractType.DepositContractType:
+      data = Contracts.DepositContract.encode(contract).finish();
+      type_url += "DepositContract";
+      break;
+    case TXContract_ContractType.ITOTriggerContractType:
+      data = Contracts.ITOTriggerContract.encode(contract).finish();
+      type_url += "ITOTriggerContract";
+      break;
+    case TXContract_ContractType.SmartContractType:
+      data = Contracts.SmartContract.encode(contract).finish();
+      type_url += "SmartContract";
+      break;
     default:
       throw "invalid transaction type";
   }
