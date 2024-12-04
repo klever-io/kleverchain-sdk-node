@@ -1,4 +1,5 @@
-import utils from ".";
+import utils, { calculateFees } from ".";
+import { TXContract_ContractType } from "../transaction";
 
 describe("Utils :", () => {
   it("should be able to generate a privateKey/address pair", async () => {
@@ -17,5 +18,18 @@ describe("Utils :", () => {
     utils.setProviders(providers);
 
     expect(utils.getProviders()).toEqual(providers);
+  });
+
+  it("should be able to calculate fees", async () => {
+    const fees = await calculateFees(
+      TXContract_ContractType.TransferContractType,
+      {
+        data: "Some data",
+      }
+    );
+
+    expect(fees?.BandwidthFee).toBeTruthy();
+    expect(fees?.KAppFee).toBeTruthy();
+    expect(fees?.TotalFee).toBeTruthy();
   });
 });
