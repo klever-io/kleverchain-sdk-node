@@ -289,6 +289,7 @@ const utils = {
   validateSignature,
   validateAddress,
   calculateFees,
+  getNetworkParams,
 };
 
 export default utils;
