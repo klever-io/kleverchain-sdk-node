@@ -208,8 +208,6 @@ export const calculateFees = async (
     TotalFee: kappFee + bandwidthFee,
   };
 
-  console.log(fees);
-
   return fees;
 };
 
