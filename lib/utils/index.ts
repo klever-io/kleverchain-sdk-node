@@ -188,10 +188,13 @@ export const parseAccountPermissionBinaryOperations = (
 
 export const calculateFees = async (
   contractType: TXContract_ContractType,
-  { data = "", network = "mainnet" },
-  networkParams?: IParsedNetworkParam[]
+  {
+    data = "",
+    network = "mainnet",
+    networkParams = [] as IParsedNetworkParam[],
+  }
 ): Promise<IFees> => {
-  if (!networkParams) {
+  if (!networkParams.length) {
     networkParams = await getNetworkParams(network);
   }
 
