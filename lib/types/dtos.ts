@@ -66,3 +66,5 @@ export interface IDecodedTransaction {
   error: string;
   code: string;
 }
+
+export type IProviderNetwork = "mainnet" | "testnet" | "devnet";

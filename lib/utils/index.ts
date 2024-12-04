@@ -1,10 +1,13 @@
-import { Account, IProvider, ITransaction } from "..";
+import { Account, IProvider, ITransaction, TXContract_ContractType } from "..";
 
 import * as ed from "@noble/ed25519";
 
-import { IBroadcastResponse } from "@klever/kleverweb/dist/types/dtos";
+import { IBroadcastResponse, IFees } from "@klever/kleverweb/dist/types/dtos";
 import { bech32 } from "bech32";
 import { IDecodedTransaction } from "../types/dtos";
+import { IParsedNetworkParam } from "../types/proposals";
+import { paramContractMap, proposalsMap } from "./proposals";
+import { BASE_TX_SIZE, KLV_PRECISION } from "./globals";
 
 const decodeAddress = async (address: string): Promise<Uint8Array> => {
   const decoded = bech32.decode(address);
@@ -183,6 +186,93 @@ export const parseAccountPermissionBinaryOperations = (
   return reverseHexBytes(hex);
 };
 
+export const calculateFees = async (
+  contractType: TXContract_ContractType,
+  {
+    data = "",
+    network = "mainnet",
+    networkParams = [] as IParsedNetworkParam[],
+  }
+): Promise<IFees> => {
+  if (!networkParams.length) {
+    networkParams = await getNetworkParams(network);
+  }
+
+  const kappFee = getKappFee(contractType, networkParams);
+
+  const bandwidthFee = getBandwidthFee(data, networkParams);
+
+  const fees: IFees = {
+    BandwidthFee: bandwidthFee,
+    KAppFee: kappFee,
+    TotalFee: kappFee + bandwidthFee,
+  };
+
+  return fees;
+};
+
+export const getNetworkParams = async (
+  network = "mainnet"
+): Promise<IParsedNetworkParam[]> => {
+  const res = await fetch(
+    `https://api.${network}.klever.finance/v1.0/network/network-parameters`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch network parameters");
+  }
+
+  const {
+    data: { parameters: networkParams },
+  } = await res.json();
+
+  let parsedNetworkParams = {} as IParsedNetworkParam[];
+
+  if (networkParams) {
+    parsedNetworkParams = Object.keys(proposalsMap).map((key, index) => {
+      const currentValue = networkParams[key]?.value;
+      return {
+        number: index,
+        currentValue,
+        parameterLabel: key,
+      };
+    });
+  }
+
+  return parsedNetworkParams;
+};
+
+export const getKappFee = (
+  contractType: TXContract_ContractType,
+  networkParams: IParsedNetworkParam[]
+): number => {
+  return Number(
+    networkParams?.find(
+      (item) =>
+        item.parameterLabel ===
+        paramContractMap[contractType as keyof typeof paramContractMap]
+    )?.currentValue
+  );
+};
+
+export const getBandwidthFee = (
+  data: string,
+  networkParams: IParsedNetworkParam[]
+): number => {
+  const dataLength = data.length;
+  const bandwidthFeeMultiplier = Number(
+    networkParams?.find((item) => item.parameterLabel === "FeePerDataByte")
+      ?.currentValue
+  );
+
+  const bandwidthFee = (dataLength + BASE_TX_SIZE) * bandwidthFeeMultiplier;
+
+  return bandwidthFee;
+};
+
 const utils = {
   getAddressFromPrivateKey,
   generateKeyPair,
@@ -198,6 +288,8 @@ const utils = {
   fromHex,
   validateSignature,
   validateAddress,
+  calculateFees,
+  getNetworkParams,
 };
 
 export default utils;
