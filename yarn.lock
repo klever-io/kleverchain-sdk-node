@@ -581,53 +581,15 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@klever/kleverweb@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@klever/kleverweb/-/kleverweb-1.1.0.tgz#995a9603bd111f50214dcbfce58147c6ca77bb67"
-  integrity sha512-Y+KUq1hEKyFFxZWjp6yCK4h1WWplf1xGL3UulmJEcoObXxtgVlfZdnmwY5aF/kWo38gTiqKsTrCd5x3VkRR3eA==
-  dependencies:
-    "@protobuf-ts/plugin" "^2.7.0"
+"@klever/kleverweb@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@klever/kleverweb/-/kleverweb-1.3.2.tgz#2d3039735978f8d874cfe942269de0693b79e184"
+  integrity sha512-ToHSw+qbArlI5xEG0hqmWbtDB0FYk5UxCCAPV4bDiMbXn8WolgjJkUvYZI6g3jq9tLkAo5fEbb3V8anpx4FuRw==
 
 "@noble/ed25519@^1.7.1":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-1.7.1.tgz#6899660f6fbb97798a6fbd227227c4589a454724"
   integrity sha512-Rk4SkJFaXZiznFyC/t77Q0NKS4FL7TLJJsVG2V2oiEq3kJVeTdxysEe/yRWSpnWMe808XRDJ+VFh5pt/FN5plw==
-
-"@protobuf-ts/plugin-framework@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin-framework/-/plugin-framework-2.8.2.tgz#8699938576f68d01a9a937aa383db8fdcef6f64d"
-  integrity sha512-ivcJdNVB3Iee8044f8erZGBgmB6ZfQbbKyxRgDBXRVKYxsruLr432WcT5upw9autK9OnlSVLaebi8kDneFXd2g==
-  dependencies:
-    "@protobuf-ts/runtime" "^2.8.2"
-    typescript "^3.9"
-
-"@protobuf-ts/plugin@^2.7.0":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin/-/plugin-2.8.2.tgz#f65f4362721e6a3bb3ce04f6d9760901e576eaa7"
-  integrity sha512-rTPxaeKBfUar8ubKxbVdv4XL6AcGA0OOgHNHFyrfODP7Epy80omwuvgFJex1YpeNFJxm/FZXXj5Z+nHuhYEqJg==
-  dependencies:
-    "@protobuf-ts/plugin-framework" "^2.8.2"
-    "@protobuf-ts/protoc" "^2.8.2"
-    "@protobuf-ts/runtime" "^2.8.2"
-    "@protobuf-ts/runtime-rpc" "^2.8.2"
-    typescript "^3.9"
-
-"@protobuf-ts/protoc@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/protoc/-/protoc-2.8.2.tgz#45809eda3037caff300b9061262444ae7ad891ec"
-  integrity sha512-1e+rOgp22ElyqRWunSc8bhatJcvRe90AGPceVn67IFYzybvfKl17vP1igHddeYkN0dzOucnOrwqn2v1jnDfE2w==
-
-"@protobuf-ts/runtime-rpc@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime-rpc/-/runtime-rpc-2.8.2.tgz#8af6d5eab44e2fc92cfe9a83a5c351b5f2fcdfbe"
-  integrity sha512-vum/Y7AXdUTWGFu7dke/jCSB9dV3Oo3iVPcce3j7KudpzzWarDkEGvXjKv3Y8zJPj5waToyxwBNSb7eo5Vw5WA==
-  dependencies:
-    "@protobuf-ts/runtime" "^2.8.2"
-
-"@protobuf-ts/runtime@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime/-/runtime-2.8.2.tgz#5d5424a6ae7fb846c3f4d0f2dd6448db65bb69d6"
-  integrity sha512-PVxsH81y9kEbHldxxG/8Y3z2mTXWQytRl8zNS0mTPUjkEC+8GUX6gj6LsA8EFp25fAs9V0ruh+aNWmPccEI9MA==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -2614,11 +2576,6 @@ type-fest@^0.21.3:
   version "0.21.3"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.21.3.tgz#d260a24b0198436e133fa26a524a6d65fa3b2e37"
   integrity sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==
-
-typescript@^3.9:
-  version "3.9.10"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.10.tgz#70f3910ac7a51ed6bef79da7800690b19bf778b8"
-  integrity sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==
 
 typescript@^4.5.5:
   version "4.5.5"

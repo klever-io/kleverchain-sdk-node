@@ -29,6 +29,10 @@ export const protobufPackage = "google.protobuf";
  *     if (any.is(Foo.class)) {
  *       foo = any.unpack(Foo.class);
  *     }
+ *     // or ...
+ *     if (any.isSameTypeAs(Foo.getDefaultInstance())) {
+ *       foo = any.unpack(Foo.getDefaultInstance());
+ *     }
  *
  *  Example 3: Pack and unpack a message in Python.
  *
@@ -117,19 +121,19 @@ export interface Any {
    * Schemes other than `http`, `https` (or the empty scheme) might be
    * used with implementation specific semantics.
    */
-  type_url?: string;
+  typeUrl?: string;
   /** Must be a valid serialized protocol buffer of the above specified type. */
   value?: Uint8Array;
 }
 
 function createBaseAny(): Any {
-  return { type_url: "", value: new Uint8Array() };
+  return { typeUrl: "", value: new Uint8Array() };
 }
 
 export const Any = {
   encode(message: Any, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.type_url !== undefined && message.type_url !== "") {
-      writer.uint32(10).string(message.type_url);
+    if (message.typeUrl !== undefined && message.typeUrl !== "") {
+      writer.uint32(10).string(message.typeUrl);
     }
     if (message.value !== undefined && message.value.length !== 0) {
       writer.uint32(18).bytes(message.value);
@@ -145,7 +149,7 @@ export const Any = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.type_url = reader.string();
+          message.typeUrl = reader.string();
           break;
         case 2:
           message.value = reader.bytes();
@@ -160,14 +164,14 @@ export const Any = {
 
   fromJSON(object: any): Any {
     return {
-      type_url: isSet(object.type_url) ? String(object.type_url) : "",
+      typeUrl: isSet(object.typeUrl) ? String(object.typeUrl) : "",
       value: isSet(object.value) ? bytesFromBase64(object.value) : new Uint8Array(),
     };
   },
 
   toJSON(message: Any): unknown {
     const obj: any = {};
-    message.type_url !== undefined && (obj.type_url = message.type_url);
+    message.typeUrl !== undefined && (obj.typeUrl = message.typeUrl);
     message.value !== undefined &&
       (obj.value = base64FromBytes(message.value !== undefined ? message.value : new Uint8Array()));
     return obj;
@@ -175,7 +179,7 @@ export const Any = {
 
   fromPartial<I extends Exact<DeepPartial<Any>, I>>(object: I): Any {
     const message = createBaseAny();
-    message.type_url = object.type_url ?? "";
+    message.typeUrl = object.typeUrl ?? "";
     message.value = object.value ?? new Uint8Array();
     return message;
   },
@@ -220,7 +224,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "type_url",
+        "jsonName": "typeUrl",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -274,21 +278,21 @@ export const protoMetadata: ProtoMetadata = {
     "sourceCodeInfo": {
       "location": [{
         "path": [4, 0],
-        "span": [124, 0, 157, 1],
+        "span": [127, 0, 160, 1],
         "leadingComments":
-          ' `Any` contains an arbitrary serialized protocol buffer message along with a\n URL that describes the type of the serialized message.\n\n Protobuf library provides support to pack/unpack Any values in the form\n of utility functions or additional generated methods of the Any type.\n\n Example 1: Pack and unpack a message in C++.\n\n     Foo foo = ...;\n     Any any;\n     any.PackFrom(foo);\n     ...\n     if (any.UnpackTo(&foo)) {\n       ...\n     }\n\n Example 2: Pack and unpack a message in Java.\n\n     Foo foo = ...;\n     Any any = Any.pack(foo);\n     ...\n     if (any.is(Foo.class)) {\n       foo = any.unpack(Foo.class);\n     }\n\n  Example 3: Pack and unpack a message in Python.\n\n     foo = Foo(...)\n     any = Any()\n     any.Pack(foo)\n     ...\n     if any.Is(Foo.DESCRIPTOR):\n       any.Unpack(foo)\n       ...\n\n  Example 4: Pack and unpack a message in Go\n\n      foo := &pb.Foo{...}\n      any, err := anypb.New(foo)\n      if err != nil {\n        ...\n      }\n      ...\n      foo := &pb.Foo{}\n      if err := any.UnmarshalTo(foo); err != nil {\n        ...\n      }\n\n The pack methods provided by protobuf library will by default use\n \'type.googleapis.com/full.type.name\' as the type URL and the unpack\n methods only use the fully qualified type name after the last \'/\'\n in the type URL, for example "foo.bar.com/x/y.z" will yield type\n name "y.z".\n\n\n JSON\n ====\n The JSON representation of an `Any` value uses the regular\n representation of the deserialized, embedded message, with an\n additional field `@type` which contains the type URL. Example:\n\n     package google.profile;\n     message Person {\n       string first_name = 1;\n       string last_name = 2;\n     }\n\n     {\n       "@type": "type.googleapis.com/google.profile.Person",\n       "firstName": <string>,\n       "lastName": <string>\n     }\n\n If the embedded message type is well-known and has a custom JSON\n representation, that representation will be embedded adding a field\n `value` which holds the custom JSON in addition to the `@type`\n field. Example (for message [google.protobuf.Duration][]):\n\n     {\n       "@type": "type.googleapis.com/google.protobuf.Duration",\n       "value": "1.212s"\n     }\n\n',
+          ' `Any` contains an arbitrary serialized protocol buffer message along with a\n URL that describes the type of the serialized message.\n\n Protobuf library provides support to pack/unpack Any values in the form\n of utility functions or additional generated methods of the Any type.\n\n Example 1: Pack and unpack a message in C++.\n\n     Foo foo = ...;\n     Any any;\n     any.PackFrom(foo);\n     ...\n     if (any.UnpackTo(&foo)) {\n       ...\n     }\n\n Example 2: Pack and unpack a message in Java.\n\n     Foo foo = ...;\n     Any any = Any.pack(foo);\n     ...\n     if (any.is(Foo.class)) {\n       foo = any.unpack(Foo.class);\n     }\n     // or ...\n     if (any.isSameTypeAs(Foo.getDefaultInstance())) {\n       foo = any.unpack(Foo.getDefaultInstance());\n     }\n\n  Example 3: Pack and unpack a message in Python.\n\n     foo = Foo(...)\n     any = Any()\n     any.Pack(foo)\n     ...\n     if any.Is(Foo.DESCRIPTOR):\n       any.Unpack(foo)\n       ...\n\n  Example 4: Pack and unpack a message in Go\n\n      foo := &pb.Foo{...}\n      any, err := anypb.New(foo)\n      if err != nil {\n        ...\n      }\n      ...\n      foo := &pb.Foo{}\n      if err := any.UnmarshalTo(foo); err != nil {\n        ...\n      }\n\n The pack methods provided by protobuf library will by default use\n \'type.googleapis.com/full.type.name\' as the type URL and the unpack\n methods only use the fully qualified type name after the last \'/\'\n in the type URL, for example "foo.bar.com/x/y.z" will yield type\n name "y.z".\n\n JSON\n ====\n The JSON representation of an `Any` value uses the regular\n representation of the deserialized, embedded message, with an\n additional field `@type` which contains the type URL. Example:\n\n     package google.profile;\n     message Person {\n       string first_name = 1;\n       string last_name = 2;\n     }\n\n     {\n       "@type": "type.googleapis.com/google.profile.Person",\n       "firstName": <string>,\n       "lastName": <string>\n     }\n\n If the embedded message type is well-known and has a custom JSON\n representation, that representation will be embedded adding a field\n `value` which holds the custom JSON in addition to the `@type`\n field. Example (for message [google.protobuf.Duration][]):\n\n     {\n       "@type": "type.googleapis.com/google.protobuf.Duration",\n       "value": "1.212s"\n     }\n\n',
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 0, 2, 0],
-        "span": [153, 2, 22],
+        "span": [156, 2, 22],
         "leadingComments":
           ' A URL/resource name that uniquely identifies the type of the serialized\n protocol buffer message. This string must contain at least\n one "/" character. The last segment of the URL\'s path must represent\n the fully qualified name of the type (as in\n `path/google.protobuf.Duration`). The name should be in a canonical form\n (e.g., leading "." is not accepted).\n\n In practice, teams usually precompile into the binary all types that they\n expect it to use in the context of Any. However, for URLs which use the\n scheme `http`, `https`, or no scheme, one can optionally set up a type\n server that maps type URLs to message definitions as follows:\n\n * If no scheme is provided, `https` is assumed.\n * An HTTP GET on the URL must yield a [google.protobuf.Type][]\n   value in binary format, or produce an error.\n * Applications are allowed to cache lookup results based on the\n   URL, or have them precompiled into a binary to avoid any\n   lookup. Therefore, binary compatibility needs to be preserved\n   on changes to types. (Use versioned type names to manage\n   breaking changes.)\n\n Note: this functionality is not currently available in the official\n protobuf release, and it is not used for type URLs beginning with\n type.googleapis.com.\n\n Schemes other than `http`, `https` (or the empty scheme) might be\n used with implementation specific semantics.\n\n',
         "trailingComments": "",
         "leadingDetachedComments": [],
       }, {
         "path": [4, 0, 2, 1],
-        "span": [156, 2, 18],
+        "span": [159, 2, 18],
         "leadingComments": " Must be a valid serialized protocol buffer of the above specified type.\n",
         "trailingComments": "",
         "leadingDetachedComments": [],
