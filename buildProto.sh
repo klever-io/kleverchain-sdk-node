@@ -2,6 +2,9 @@ PROTOC_GEN_TS_PATH="node_modules/.bin/protoc-gen-ts_proto"
 
 OUT_DIR="."
 
+# remove all strings that match  '[json_name = "something"]' in the proto file
+sed -i '' 's/\[json_name = "[^"]*"\]//g' lib/transaction/proto/*.proto
+
 protoc \
     --proto_path=. \
     --plugin="protoc-gen-ts=${PROTOC_GEN_TS_PATH}" \

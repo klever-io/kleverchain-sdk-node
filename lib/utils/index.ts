@@ -251,9 +251,7 @@ export const getKappFee = (
 ): number => {
   return Number(
     networkParams?.find(
-      (item) =>
-        item.parameterLabel ===
-        paramContractMap[contractType as keyof typeof paramContractMap]
+      (item) => item.parameterLabel === paramContractMap[contractType]
     )?.currentValue
   );
 };

@@ -3,17 +3,17 @@ import {
   IContractRequest,
   ITransaction,
   ITxOptionsRequest,
-  ITxRequest,
 } from "@klever/kleverweb/dist/types/dtos";
-import utils from "../utils";
 import {
   IAccountInfo,
   IAccountResponse,
   INodeAccountResponse,
 } from "../types/dtos";
+import utils from "../utils";
 
 import * as ed from "@noble/ed25519";
 
+import KleverWeb from "@klever/kleverweb";
 import fs from "fs";
 
 class Account {
@@ -47,7 +47,7 @@ class Account {
       this.balance = 0;
       this.nonce = 0;
 
-      console.log(e);
+      console.error(e);
       throw e;
     }
   }
@@ -98,59 +98,11 @@ class Account {
     txData?: string[],
     options?: ITxOptionsRequest
   ): Promise<ITransaction> => {
-    if (contracts?.length === 0) {
-      throw "empty contracts";
-    }
-
-    const fistContractType = contracts[0]?.type;
-    const payloads = contracts.map((contract) => {
-      if (contract.type != fistContractType) {
-        throw "Multiple contracts of different types are not supported yet";
-      }
-
-      return contract.payload;
+    return await new KleverWeb().buildTransaction(contracts, txData, {
+      sender: options?.sender || this.address,
+      nonce: options?.nonce || this.nonce,
+      provider: options?.provider || utils.getProviders(),
     });
-
-    const nonce = options?.nonce ? options.nonce : this.nonce;
-    const permID = options?.permID || 0;
-
-    const parsedMetadata: string[] = [];
-
-    txData?.forEach((data) => {
-      if (data) {
-        parsedMetadata.push(Buffer.from(data).toString("base64"));
-      }
-    });
-
-    const txBody: ITxRequest = {
-      type: fistContractType,
-      nonce,
-      sender: this.address,
-      data: parsedMetadata,
-      permID,
-      contracts: payloads,
-    };
-
-    try {
-      const req = await fetch(`${utils.getProviders().node}/transaction/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(txBody),
-      });
-
-      const res = await req.json();
-      if (res?.error) throw res?.error;
-
-      if (!res?.data && !res?.data?.result) {
-        throw "failed to generate transaction";
-      }
-
-      return res.data.result as ITransaction;
-    } catch (e) {
-      throw e;
-    }
   };
 
   signMessage = async (message: string): Promise<string> => {
@@ -176,7 +128,7 @@ class Account {
       const res = await req.json();
       hash = res.data.tx.hash;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     const signature = await this.signMessage(hash);
 

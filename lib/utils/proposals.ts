@@ -1,4 +1,4 @@
-import { TXContract_ContractType } from "../transaction";
+import { TransactionType } from "@klever/kleverweb/dist/types/enums";
 import { IProposalsMap } from "../types/proposals";
 import { KLV_PRECISION } from "./globals";
 
@@ -192,36 +192,31 @@ export const proposalsMap: IProposalsMap = {
 };
 
 export const paramContractMap = {
-  [TXContract_ContractType.TransferContractType]: "KAppFeeTransfer",
-  [TXContract_ContractType.CreateAssetContractType]: "KAppFeeCreateAsset",
-  [TXContract_ContractType.CreateValidatorContractType]:
-    "KAppFeeCreateValidator",
-  [TXContract_ContractType.AssetTriggerContractType]: "KAppFeeAssetTrigger",
-  [TXContract_ContractType.ValidatorConfigContractType]:
-    "KAppFeeValidatorConfig",
-  [TXContract_ContractType.FreezeContractType]: "KAppFeeFreeze",
-  [TXContract_ContractType.UnfreezeContractType]: "KAppFeeUnfreeze",
-  [TXContract_ContractType.DelegateContractType]: "KAppFeeDelegate",
-  [TXContract_ContractType.UndelegateContractType]: "KAppFeeUndelegate",
-  [TXContract_ContractType.WithdrawContractType]: "KAppFeeWithdraw",
-  [TXContract_ContractType.ClaimContractType]: "KAppFeeClaim",
-  [TXContract_ContractType.UnjailContractType]: "KAppFeeUnjail",
-  [TXContract_ContractType.SetAccountNameContractType]: "KAppFeeSetAccountName",
-  [TXContract_ContractType.ProposalContractType]: "KAppFeeProposal",
-  [TXContract_ContractType.VoteContractType]: "KAppFeeVote",
-  [TXContract_ContractType.ConfigITOContractType]: "KAppFeeConfigITO",
-  [TXContract_ContractType.SetITOPricesContractType]: "KAppFeeSetITOPrices",
-  [TXContract_ContractType.BuyContractType]: "KAppFeeBuy",
-  [TXContract_ContractType.SellContractType]: "KAppFeeSell",
-  [TXContract_ContractType.CancelMarketOrderContractType]:
-    "KAppFeeCancelMarketOrder",
-  [TXContract_ContractType.CreateMarketplaceContractType]:
-    "KAppFeeCreateMarketplace",
-  [TXContract_ContractType.ConfigMarketplaceContractType]:
-    "KAppFeeConfigMarketplace",
-  [TXContract_ContractType.UpdateAccountPermissionContractType]:
-    "KAppFeeUpdateAccountPermission",
-  [TXContract_ContractType.DepositContractType]: "KAppFeeDeposit",
-  [TXContract_ContractType.ITOTriggerContractType]: "KAppFeeITOTrigger",
-  [TXContract_ContractType.SmartContractType]: "KAppFeeSmartContract",
+  [TransactionType.Transfer]: "KAppFeeTransfer",
+  [TransactionType.CreateAsset]: "KAppFeeCreateAsset",
+  [TransactionType.CreateValidator]: "KAppFeeCreateValidator",
+  [TransactionType.AssetTrigger]: "KAppFeeAssetTrigger",
+  [TransactionType.ConfigValidator]: "KAppFeeValidatorConfig",
+  [TransactionType.Freeze]: "KAppFeeFreeze",
+  [TransactionType.Unfreeze]: "KAppFeeUnfreeze",
+  [TransactionType.Delegate]: "KAppFeeDelegate",
+  [TransactionType.Undelegate]: "KAppFeeUndelegate",
+  [TransactionType.Withdraw]: "KAppFeeWithdraw",
+  [TransactionType.Claim]: "KAppFeeClaim",
+  [TransactionType.Unjail]: "KAppFeeUnjail",
+  [TransactionType.SetAccountName]: "KAppFeeSetAccountName",
+  [TransactionType.Proposal]: "KAppFeeProposal",
+  [TransactionType.Votes]: "KAppFeeVote",
+  [TransactionType.ConfigITO]: "KAppFeeConfigITO",
+  [TransactionType.SetITOPrices]: "KAppFeeSetITOPrices",
+  [TransactionType.BuyOrder]: "KAppFeeBuy",
+  [TransactionType.SellOrder]: "KAppFeeSell",
+  [TransactionType.CancelMarketOrder]: "KAppFeeCancelMarketOrder",
+  [TransactionType.CreateMarketplace]: "KAppFeeCreateMarketplace",
+  [TransactionType.ConfigMarketplace]: "KAppFeeConfigMarketplace",
+  [TransactionType.UpdateAccountPermission]: "KAppFeeUpdateAccountPermission",
+  [TransactionType.Deposit]: "KAppFeeDeposit",
+  [TransactionType.ITOTrigger]: "KAppFeeITOTrigger",
+  [TransactionType.SmartContract]: "KAppFeeSmartContract",
+  [-1]: "UNRECOGNIZED",
 };

@@ -1,22 +1,20 @@
 import * as ed from "@noble/ed25519";
 import * as blake from "blakejs";
-import _m0 from "protobufjs/minimal";
 
 import { decodeContract } from "./contracts";
 
 import utils from "../utils";
-import * as Contracts from "./proto/contracts";
 import * as proto from "./../../google/protobuf/any";
+import * as Contracts from "./proto/contracts";
 
 import {
   Transaction as T,
-  tXContract_ContractTypeToJSON,
-  TXContract_ContractType,
   TXContract,
+  TXContract_ContractType,
   Transaction_Raw,
 } from "./proto/transaction";
 
-export { TXContract_ContractType, TXContract, Contracts, proto };
+export { Contracts, TXContract, TXContract_ContractType, proto };
 
 class Transaction {
   data: T;
@@ -76,7 +74,7 @@ class Transaction {
     try {
       hash = this.computeHash();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return false;
     }
 
@@ -153,121 +151,121 @@ const anyMarshal = (
   type: TXContract_ContractType,
   contract: any
 ): proto.Any => {
-  var type_url = "type.googleapis.com/proto.";
+  var typeUrl = "type.googleapis.com/proto.";
   var data: Uint8Array;
 
   switch (type) {
     case TXContract_ContractType.TransferContractType:
       data = Contracts.TransferContract.encode(contract).finish();
-      type_url += "TransferContract";
+      typeUrl += "TransferContract";
       break;
     case TXContract_ContractType.CreateAssetContractType:
       data = Contracts.CreateAssetContract.encode(contract).finish();
-      type_url += "CreateAssetContract";
+      typeUrl += "CreateAssetContract";
       break;
     case TXContract_ContractType.CreateValidatorContractType:
       data = Contracts.CreateValidatorContract.encode(contract).finish();
-      type_url += "CreateValidatorContract";
+      typeUrl += "CreateValidatorContract";
       break;
     case TXContract_ContractType.ValidatorConfigContractType:
       data = Contracts.ValidatorConfigContract.encode(contract).finish();
-      type_url += "ValidatorConfigContract";
+      typeUrl += "ValidatorConfigContract";
       break;
     case TXContract_ContractType.FreezeContractType:
       data = Contracts.FreezeContract.encode(contract).finish();
-      type_url += "FreezeContract";
+      typeUrl += "FreezeContract";
       break;
     case TXContract_ContractType.UnfreezeContractType:
       data = Contracts.UnfreezeContract.encode(contract).finish();
-      type_url += "UnfreezeContract";
+      typeUrl += "UnfreezeContract";
       break;
     case TXContract_ContractType.DelegateContractType:
       data = Contracts.DelegateContract.encode(contract).finish();
-      type_url += "DelegateContract";
+      typeUrl += "DelegateContract";
       break;
     case TXContract_ContractType.UndelegateContractType:
       data = Contracts.UndelegateContract.encode(contract).finish();
-      type_url += "UndelegateContract";
+      typeUrl += "UndelegateContract";
       break;
     case TXContract_ContractType.WithdrawContractType:
       data = Contracts.WithdrawContract.encode(contract).finish();
-      type_url += "WithdrawContract";
+      typeUrl += "WithdrawContract";
       break;
     case TXContract_ContractType.ClaimContractType:
       data = Contracts.ClaimContract.encode(contract).finish();
-      type_url += "ClaimContract";
+      typeUrl += "ClaimContract";
       break;
     case TXContract_ContractType.UnjailContractType:
       data = Contracts.UnjailContract.encode(contract).finish();
-      type_url += "UnjailContract";
+      typeUrl += "UnjailContract";
       break;
     case TXContract_ContractType.AssetTriggerContractType:
       data = Contracts.AssetTriggerContract.encode(contract).finish();
-      type_url += "AssetTriggerContract";
+      typeUrl += "AssetTriggerContract";
       break;
     case TXContract_ContractType.SetAccountNameContractType:
       data = Contracts.SetAccountNameContract.encode(contract).finish();
-      type_url += "SetAccountNameContract";
+      typeUrl += "SetAccountNameContract";
       break;
     case TXContract_ContractType.ProposalContractType:
       data = Contracts.ProposalContract.encode(contract).finish();
-      type_url += "ProposalContract";
+      typeUrl += "ProposalContract";
       break;
     case TXContract_ContractType.VoteContractType:
       data = Contracts.VoteContract.encode(contract).finish();
-      type_url += "VoteContract";
+      typeUrl += "VoteContract";
       break;
     case TXContract_ContractType.ConfigITOContractType:
       data = Contracts.ConfigITOContract.encode(contract).finish();
-      type_url += "ConfigITOContract";
+      typeUrl += "ConfigITOContract";
       break;
     case TXContract_ContractType.SetITOPricesContractType:
       data = Contracts.SetITOPricesContract.encode(contract).finish();
-      type_url += "SetITOPricesContract";
+      typeUrl += "SetITOPricesContract";
       break;
     case TXContract_ContractType.BuyContractType:
       data = Contracts.BuyContract.encode(contract).finish();
-      type_url += "BuyContract";
+      typeUrl += "BuyContract";
       break;
     case TXContract_ContractType.SellContractType:
       data = Contracts.SellContract.encode(contract).finish();
-      type_url += "SellContract";
+      typeUrl += "SellContract";
       break;
     case TXContract_ContractType.CancelMarketOrderContractType:
       data = Contracts.CancelMarketOrderContract.encode(contract).finish();
-      type_url += "CancelMarketOrderContract";
+      typeUrl += "CancelMarketOrderContract";
       break;
     case TXContract_ContractType.CreateMarketplaceContractType:
       data = Contracts.CreateMarketplaceContract.encode(contract).finish();
-      type_url += "CreateMarketplaceContract";
+      typeUrl += "CreateMarketplaceContract";
       break;
     case TXContract_ContractType.ConfigMarketplaceContractType:
       data = Contracts.ConfigMarketplaceContract.encode(contract).finish();
-      type_url += "ConfigMarketplaceContract";
+      typeUrl += "ConfigMarketplaceContract";
       break;
     case TXContract_ContractType.UpdateAccountPermissionContractType:
       data =
         Contracts.UpdateAccountPermissionContract.encode(contract).finish();
-      type_url += "UpdateAccountPermissionContract";
+      typeUrl += "UpdateAccountPermissionContract";
       break;
     case TXContract_ContractType.DepositContractType:
       data = Contracts.DepositContract.encode(contract).finish();
-      type_url += "DepositContract";
+      typeUrl += "DepositContract";
       break;
     case TXContract_ContractType.ITOTriggerContractType:
       data = Contracts.ITOTriggerContract.encode(contract).finish();
-      type_url += "ITOTriggerContract";
+      typeUrl += "ITOTriggerContract";
       break;
     case TXContract_ContractType.SmartContractType:
       data = Contracts.SmartContract.encode(contract).finish();
-      type_url += "SmartContract";
+      typeUrl += "SmartContract";
       break;
     default:
       throw "invalid transaction type";
   }
 
   return proto.Any.fromPartial({
-    type_url: type_url,
+    typeUrl: typeUrl,
     value: data,
   });
 };
