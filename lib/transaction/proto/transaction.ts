@@ -38,7 +38,7 @@ export enum TXContract_ContractType {
   UpdateAccountPermissionContractType = 22,
   DepositContractType = 23,
   ITOTriggerContractType = 24,
-  SmartContractType = 99,
+  SmartContractType = 63,
   UNRECOGNIZED = -1,
 }
 
@@ -119,7 +119,7 @@ export function tXContract_ContractTypeFromJSON(object: any): TXContract_Contrac
     case 24:
     case "ITOTriggerContractType":
       return TXContract_ContractType.ITOTriggerContractType;
-    case 99:
+    case 63:
     case "SmartContractType":
       return TXContract_ContractType.SmartContractType;
     case -1:
@@ -182,7 +182,7 @@ export function tXContract_ContractTypeToJSON(object: TXContract_ContractType): 
     case TXContract_ContractType.ITOTriggerContractType:
       return 24;
     case TXContract_ContractType.SmartContractType:
-      return 99;
+      return 63;
     case TXContract_ContractType.UNRECOGNIZED:
     default:
       return -1;
@@ -277,7 +277,7 @@ export enum Transaction_TXResultCode {
   BalanceError = 37,
   KAPPError = 38,
   UnfreezeError = 39,
-  UndeletegateError = 40,
+  UndelegateError = 40,
   WithdrawError = 41,
   ClaimError = 42,
   BucketsExceeded = 43,
@@ -441,8 +441,8 @@ export function transaction_TXResultCodeFromJSON(object: any): Transaction_TXRes
     case "UnfreezeError":
       return Transaction_TXResultCode.UnfreezeError;
     case 40:
-    case "UndeletegateError":
-      return Transaction_TXResultCode.UndeletegateError;
+    case "UndelegateError":
+      return Transaction_TXResultCode.UndelegateError;
     case 41:
     case "WithdrawError":
       return Transaction_TXResultCode.WithdrawError;
@@ -610,7 +610,7 @@ export function transaction_TXResultCodeToJSON(object: Transaction_TXResultCode)
       return 38;
     case Transaction_TXResultCode.UnfreezeError:
       return 39;
-    case Transaction_TXResultCode.UndeletegateError:
+    case Transaction_TXResultCode.UndelegateError:
       return 40;
     case Transaction_TXResultCode.WithdrawError:
       return 41;
@@ -731,15 +731,15 @@ export const TXContract = {
 
   fromJSON(object: any): TXContract {
     return {
-      Type: isSet(object.Type) ? tXContract_ContractTypeFromJSON(object.Type) : 0,
-      Parameter: isSet(object.Parameter) ? Any.fromJSON(object.Parameter) : undefined,
+      Type: isSet(object.type) ? tXContract_ContractTypeFromJSON(object.type) : 0,
+      Parameter: isSet(object.parameter) ? Any.fromJSON(object.parameter) : undefined,
     };
   },
 
   toJSON(message: TXContract): unknown {
     const obj: any = {};
-    message.Type !== undefined && (obj.Type = tXContract_ContractTypeToJSON(message.Type));
-    message.Parameter !== undefined && (obj.Parameter = message.Parameter ? Any.toJSON(message.Parameter) : undefined);
+    message.Type !== undefined && (obj.type = tXContract_ContractTypeToJSON(message.Type));
+    message.Parameter !== undefined && (obj.parameter = message.Parameter ? Any.toJSON(message.Parameter) : undefined);
     return obj;
   },
 
@@ -840,36 +840,43 @@ export const Transaction = {
 
   fromJSON(object: any): Transaction {
     return {
-      RawData: isSet(object.RawData) ? Transaction_Raw.fromJSON(object.RawData) : undefined,
-      Signature: Array.isArray(object?.Signature) ? object.Signature.map((e: any) => bytesFromBase64(e)) : [],
-      Result: isSet(object.Result) ? transaction_TXResultFromJSON(object.Result) : 0,
-      ResultCode: isSet(object.ResultCode) ? transaction_TXResultCodeFromJSON(object.ResultCode) : 0,
-      Receipts: Array.isArray(object?.Receipts) ? object.Receipts.map((e: any) => Transaction_Receipt.fromJSON(e)) : [],
-      Block: isSet(object.Block) ? Number(object.Block) : 0,
-      GasLimit: isSet(object.GasLimit) ? Number(object.GasLimit) : 0,
-      GasMultiplier: isSet(object.GasMultiplier) ? Number(object.GasMultiplier) : 0,
+      RawData: isSet(object.rawData) ? Transaction_Raw.fromJSON(object.rawData) : undefined,
+      Signature: Array.isArray(object?.["signature,omitempty"])
+        ? object["signature,omitempty"].map((e: any) => bytesFromBase64(e))
+        : [],
+      Result: isSet(object["result,omitempty"]) ? transaction_TXResultFromJSON(object["result,omitempty"]) : 0,
+      ResultCode: isSet(object["resultCode,omitempty"])
+        ? transaction_TXResultCodeFromJSON(object["resultCode,omitempty"])
+        : 0,
+      Receipts: Array.isArray(object?.receipts) ? object.receipts.map((e: any) => Transaction_Receipt.fromJSON(e)) : [],
+      Block: isSet(object.block) ? Number(object.block) : 0,
+      GasLimit: isSet(object.gasLimit) ? Number(object.gasLimit) : 0,
+      GasMultiplier: isSet(object.gasMultiplier) ? Number(object.gasMultiplier) : 0,
     };
   },
 
   toJSON(message: Transaction): unknown {
     const obj: any = {};
     message.RawData !== undefined &&
-      (obj.RawData = message.RawData ? Transaction_Raw.toJSON(message.RawData) : undefined);
+      (obj.rawData = message.RawData ? Transaction_Raw.toJSON(message.RawData) : undefined);
     if (message.Signature) {
-      obj.Signature = message.Signature.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
+      obj["signature,omitempty"] = message.Signature.map((e) =>
+        base64FromBytes(e !== undefined ? e : new Uint8Array())
+      );
     } else {
-      obj.Signature = [];
+      obj["signature,omitempty"] = [];
     }
-    message.Result !== undefined && (obj.Result = transaction_TXResultToJSON(message.Result));
-    message.ResultCode !== undefined && (obj.ResultCode = transaction_TXResultCodeToJSON(message.ResultCode));
+    message.Result !== undefined && (obj["result,omitempty"] = transaction_TXResultToJSON(message.Result));
+    message.ResultCode !== undefined &&
+      (obj["resultCode,omitempty"] = transaction_TXResultCodeToJSON(message.ResultCode));
     if (message.Receipts) {
-      obj.Receipts = message.Receipts.map((e) => e ? Transaction_Receipt.toJSON(e) : undefined);
+      obj.receipts = message.Receipts.map((e) => e ? Transaction_Receipt.toJSON(e) : undefined);
     } else {
-      obj.Receipts = [];
+      obj.receipts = [];
     }
-    message.Block !== undefined && (obj.Block = Math.round(message.Block));
-    message.GasLimit !== undefined && (obj.GasLimit = Math.round(message.GasLimit));
-    message.GasMultiplier !== undefined && (obj.GasMultiplier = Math.round(message.GasMultiplier));
+    message.Block !== undefined && (obj.block = Math.round(message.Block));
+    message.GasLimit !== undefined && (obj.gasLimit = Math.round(message.GasLimit));
+    message.GasMultiplier !== undefined && (obj.gasMultiplier = Math.round(message.GasMultiplier));
     return obj;
   },
 
@@ -927,16 +934,16 @@ export const Transaction_KDAFee = {
 
   fromJSON(object: any): Transaction_KDAFee {
     return {
-      KDA: isSet(object.KDA) ? bytesFromBase64(object.KDA) : new Uint8Array(),
-      Amount: isSet(object.Amount) ? Number(object.Amount) : 0,
+      KDA: isSet(object.kda) ? bytesFromBase64(object.kda) : new Uint8Array(),
+      Amount: isSet(object.amount) ? Number(object.amount) : 0,
     };
   },
 
   toJSON(message: Transaction_KDAFee): unknown {
     const obj: any = {};
     message.KDA !== undefined &&
-      (obj.KDA = base64FromBytes(message.KDA !== undefined ? message.KDA : new Uint8Array()));
-    message.Amount !== undefined && (obj.Amount = Math.round(message.Amount));
+      (obj.kda = base64FromBytes(message.KDA !== undefined ? message.KDA : new Uint8Array()));
+    message.Amount !== undefined && (obj.amount = Math.round(message.Amount));
     return obj;
   },
 
@@ -1049,42 +1056,44 @@ export const Transaction_Raw = {
 
   fromJSON(object: any): Transaction_Raw {
     return {
-      Nonce: isSet(object.Nonce) ? Number(object.Nonce) : 0,
-      Sender: isSet(object.Sender) ? bytesFromBase64(object.Sender) : new Uint8Array(),
-      Contract: Array.isArray(object?.Contract) ? object.Contract.map((e: any) => TXContract.fromJSON(e)) : [],
-      PermissionID: isSet(object.PermissionID) ? Number(object.PermissionID) : 0,
-      Data: Array.isArray(object?.Data) ? object.Data.map((e: any) => bytesFromBase64(e)) : [],
-      KAppFee: isSet(object.KAppFee) ? Number(object.KAppFee) : 0,
-      BandwidthFee: isSet(object.BandwidthFee) ? Number(object.BandwidthFee) : 0,
-      Version: isSet(object.Version) ? Number(object.Version) : 0,
-      ChainID: isSet(object.ChainID) ? bytesFromBase64(object.ChainID) : new Uint8Array(),
-      KDAFee: isSet(object.KDAFee) ? Transaction_KDAFee.fromJSON(object.KDAFee) : undefined,
+      Nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
+      Sender: isSet(object.sender) ? bytesFromBase64(object.sender) : new Uint8Array(),
+      Contract: Array.isArray(object?.contract) ? object.contract.map((e: any) => TXContract.fromJSON(e)) : [],
+      PermissionID: isSet(object["permissionID,omitempty"]) ? Number(object["permissionID,omitempty"]) : 0,
+      Data: Array.isArray(object?.["data,omitempty"])
+        ? object["data,omitempty"].map((e: any) => bytesFromBase64(e))
+        : [],
+      KAppFee: isSet(object.kAppFee) ? Number(object.kAppFee) : 0,
+      BandwidthFee: isSet(object.bandwidthFee) ? Number(object.bandwidthFee) : 0,
+      Version: isSet(object["version,omitempty"]) ? Number(object["version,omitempty"]) : 0,
+      ChainID: isSet(object["chainID,omitempty"]) ? bytesFromBase64(object["chainID,omitempty"]) : new Uint8Array(),
+      KDAFee: isSet(object.kdaFee) ? Transaction_KDAFee.fromJSON(object.kdaFee) : undefined,
     };
   },
 
   toJSON(message: Transaction_Raw): unknown {
     const obj: any = {};
-    message.Nonce !== undefined && (obj.Nonce = Math.round(message.Nonce));
+    message.Nonce !== undefined && (obj.nonce = Math.round(message.Nonce));
     message.Sender !== undefined &&
-      (obj.Sender = base64FromBytes(message.Sender !== undefined ? message.Sender : new Uint8Array()));
+      (obj.sender = base64FromBytes(message.Sender !== undefined ? message.Sender : new Uint8Array()));
     if (message.Contract) {
-      obj.Contract = message.Contract.map((e) => e ? TXContract.toJSON(e) : undefined);
+      obj.contract = message.Contract.map((e) => e ? TXContract.toJSON(e) : undefined);
     } else {
-      obj.Contract = [];
+      obj.contract = [];
     }
-    message.PermissionID !== undefined && (obj.PermissionID = Math.round(message.PermissionID));
+    message.PermissionID !== undefined && (obj["permissionID,omitempty"] = Math.round(message.PermissionID));
     if (message.Data) {
-      obj.Data = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
+      obj["data,omitempty"] = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
     } else {
-      obj.Data = [];
+      obj["data,omitempty"] = [];
     }
-    message.KAppFee !== undefined && (obj.KAppFee = Math.round(message.KAppFee));
-    message.BandwidthFee !== undefined && (obj.BandwidthFee = Math.round(message.BandwidthFee));
-    message.Version !== undefined && (obj.Version = Math.round(message.Version));
+    message.KAppFee !== undefined && (obj.kAppFee = Math.round(message.KAppFee));
+    message.BandwidthFee !== undefined && (obj.bandwidthFee = Math.round(message.BandwidthFee));
+    message.Version !== undefined && (obj["version,omitempty"] = Math.round(message.Version));
     message.ChainID !== undefined &&
-      (obj.ChainID = base64FromBytes(message.ChainID !== undefined ? message.ChainID : new Uint8Array()));
+      (obj["chainID,omitempty"] = base64FromBytes(message.ChainID !== undefined ? message.ChainID : new Uint8Array()));
     message.KDAFee !== undefined &&
-      (obj.KDAFee = message.KDAFee ? Transaction_KDAFee.toJSON(message.KDAFee) : undefined);
+      (obj.kdaFee = message.KDAFee ? Transaction_KDAFee.toJSON(message.KDAFee) : undefined);
     return obj;
   },
 
@@ -1139,15 +1148,15 @@ export const Transaction_Receipt = {
   },
 
   fromJSON(object: any): Transaction_Receipt {
-    return { Data: Array.isArray(object?.Data) ? object.Data.map((e: any) => bytesFromBase64(e)) : [] };
+    return { Data: Array.isArray(object?.data) ? object.data.map((e: any) => bytesFromBase64(e)) : [] };
   },
 
   toJSON(message: Transaction_Receipt): unknown {
     const obj: any = {};
     if (message.Data) {
-      obj.Data = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
+      obj.data = message.Data.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
     } else {
-      obj.Data = [];
+      obj.data = [];
     }
     return obj;
   },
@@ -1198,7 +1207,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Type",
+        "jsonName": "type",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1210,7 +1219,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Parameter",
+        "jsonName": "parameter",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -1244,7 +1253,7 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "UpdateAccountPermissionContractType", "number": 22, "options": undefined },
           { "name": "DepositContractType", "number": 23, "options": undefined },
           { "name": "ITOTriggerContractType", "number": 24, "options": undefined },
-          { "name": "SmartContractType", "number": 99, "options": undefined },
+          { "name": "SmartContractType", "number": 63, "options": undefined },
         ],
         "options": undefined,
         "reservedRange": [],
@@ -1266,7 +1275,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "RawData",
+        "jsonName": "rawData",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1278,7 +1287,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Signature",
+        "jsonName": "signature,omitempty",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1290,7 +1299,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Result",
+        "jsonName": "result,omitempty",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1302,7 +1311,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "ResultCode",
+        "jsonName": "resultCode,omitempty",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1314,7 +1323,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Receipts",
+        "jsonName": "receipts",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1326,7 +1335,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "Block",
+        "jsonName": "block",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1338,7 +1347,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "GasLimit",
+        "jsonName": "gasLimit",
         "options": undefined,
         "proto3Optional": false,
       }, {
@@ -1350,7 +1359,7 @@ export const protoMetadata: ProtoMetadata = {
         "extendee": "",
         "defaultValue": "",
         "oneofIndex": 0,
-        "jsonName": "GasMultiplier",
+        "jsonName": "gasMultiplier",
         "options": undefined,
         "proto3Optional": false,
       }],
@@ -1366,7 +1375,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "KDA",
+          "jsonName": "kda",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1378,7 +1387,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Amount",
+          "jsonName": "amount",
           "options": undefined,
           "proto3Optional": false,
         }],
@@ -1401,7 +1410,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Nonce",
+          "jsonName": "nonce",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1413,7 +1422,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Sender",
+          "jsonName": "sender",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1425,7 +1434,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Contract",
+          "jsonName": "contract",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1437,7 +1446,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "PermissionID",
+          "jsonName": "permissionID,omitempty",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1449,7 +1458,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Data",
+          "jsonName": "data,omitempty",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1461,7 +1470,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "KAppFee",
+          "jsonName": "kAppFee",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1473,7 +1482,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "BandwidthFee",
+          "jsonName": "bandwidthFee",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1485,7 +1494,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Version",
+          "jsonName": "version,omitempty",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1497,7 +1506,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "ChainID",
+          "jsonName": "chainID,omitempty",
           "options": undefined,
           "proto3Optional": false,
         }, {
@@ -1509,7 +1518,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "KDAFee",
+          "jsonName": "kdaFee",
           "options": undefined,
           "proto3Optional": false,
         }],
@@ -1532,7 +1541,7 @@ export const protoMetadata: ProtoMetadata = {
           "extendee": "",
           "defaultValue": "",
           "oneofIndex": 0,
-          "jsonName": "Data",
+          "jsonName": "data",
           "options": undefined,
           "proto3Optional": false,
         }],
@@ -1598,7 +1607,7 @@ export const protoMetadata: ProtoMetadata = {
           { "name": "BalanceError", "number": 37, "options": undefined },
           { "name": "KAPPError", "number": 38, "options": undefined },
           { "name": "UnfreezeError", "number": 39, "options": undefined },
-          { "name": "UndeletegateError", "number": 40, "options": undefined },
+          { "name": "UndelegateError", "number": 40, "options": undefined },
           { "name": "WithdrawError", "number": 41, "options": undefined },
           { "name": "ClaimError", "number": 42, "options": undefined },
           { "name": "BucketsExceeded", "number": 43, "options": undefined },
@@ -1756,7 +1765,7 @@ export const protoMetadata: ProtoMetadata = {
         "leadingDetachedComments": [],
       }, {
         "path": [4, 1, 3, 0, 2, 1],
-        "span": [137, 8, 36],
+        "span": [137, 8, 59],
         "leadingComments": "",
         "trailingComments": " TODO: allow spread\n",
         "leadingDetachedComments": [],

@@ -35,10 +35,10 @@ message TXContract {
         DepositContractType                   = 23;
         ITOTriggerContractType                = 24;
 
-        SmartContractType                     = 99;
+        SmartContractType                     = 63;
     }
-    ContractType Type                 = 1;
-    google.protobuf.Any Parameter     = 2;
+    ContractType Type                 = 1 [json_name = "type"];
+    google.protobuf.Any Parameter     = 2 [json_name = "parameter"];
 }
 
 // Transaction holds all the data needed for a value transfer
@@ -91,7 +91,7 @@ message Transaction {
         BalanceError             = 37;
         KAPPError                = 38;
         UnfreezeError            = 39;
-        UndeletegateError        = 40;
+        UndelegateError          = 40;
         WithdrawError            = 41;
         ClaimError               = 42;
         BucketsExceeded          = 43;
@@ -128,40 +128,40 @@ message Transaction {
         VMSimulateFailed           = 64;
         // KDA Transfer not allowed
         KDATransferNotAllowed      = 65;
-        
-        
+
+
         Fail                     = 99;
     }
 
     message KDAFee {
-        bytes    KDA            = 1;
-        int64    Amount         = 2;
+        bytes    KDA            = 1 [json_name = "kda"];
+        int64    Amount         = 2 [json_name = "amount"];
         // TODO: allow spread
     }
 
     message Raw {
-        uint64   Nonce               = 1 ;
-        bytes    Sender              = 2 ;
-        repeated TXContract Contract = 6 ;
-        int32    PermissionID        = 7 ;
-        repeated bytes Data          = 10;
-        int64    KAppFee             = 13;
-        int64    BandwidthFee        = 14;
-        uint32   Version             = 15;
-        bytes    ChainID             = 16;
-        KDAFee   KDAFee              = 17;
+        uint64   Nonce               = 1  [json_name = "nonce"];
+        bytes    Sender              = 2  [json_name = "sender"];
+        repeated TXContract Contract = 6  [json_name = "contract"];
+        int32    PermissionID        = 7  [json_name = "permissionID,omitempty"];
+        repeated bytes Data          = 10 [json_name = "data,omitempty"];
+        int64    KAppFee             = 13 [json_name = "kAppFee"];
+        int64    BandwidthFee        = 14 [json_name = "bandwidthFee"];
+        uint32   Version             = 15 [json_name = "version,omitempty"];
+        bytes    ChainID             = 16 [json_name = "chainID,omitempty"];
+        KDAFee   KDAFee              = 17 [json_name = "kdaFee"];
     }
 
     message Receipt {
-        repeated bytes Data = 1;
+        repeated bytes Data = 1 [json_name = "data"];
     }
 
-    Raw              RawData           = 1;
-    repeated bytes   Signature         = 2;
-    TXResult         Result            = 3;
-    TXResultCode     ResultCode        = 4;
-    repeated Receipt Receipts          = 5;
-    uint64           Block             = 6;
-    uint64           GasLimit          = 7;
-    uint64           GasMultiplier     = 8;
+    Raw              RawData           = 1 [json_name = "rawData"];
+    repeated bytes   Signature         = 2 [json_name = "signature,omitempty"];
+    TXResult         Result            = 3 [json_name = "result,omitempty"];
+    TXResultCode     ResultCode        = 4 [json_name = "resultCode,omitempty"];
+    repeated Receipt Receipts          = 5 [json_name = "receipts"];
+    uint64           Block             = 6 [json_name = "block"];
+    uint64           GasLimit          = 7 [json_name = "gasLimit"];
+    uint64           GasMultiplier     = 8 [json_name = "gasMultiplier"];
 }
