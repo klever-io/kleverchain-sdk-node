@@ -37,7 +37,8 @@
     "ts-node": "^10.9.1",
     "ts-proto": "^2.6.1",
     "tslib": "^2.3.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   },
   "peerDependencies": {},
   "dependencies": {
@@ -47,7 +48,6 @@
     "bech32": "^2.0.0",
     "blakejs": "^1.2.1",
     "dotenv": "^16.4.7",
-    "google-protobuf": "^3.21.4",
-    "vitest": "^3.0.7"
+    "google-protobuf": "^3.21.4"
   }
 }
