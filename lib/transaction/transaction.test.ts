@@ -84,9 +84,6 @@ describe("Transaction", () => {
     expect(tx.data.RawData?.Sender).toEqual(senderDecoded);
     expect(tx.data.RawData?.Nonce).toEqual(158);
     expect(tx.data.RawData?.Contract?.length).toEqual(3);
-
-    console.log(JSON.parse(await tx.decode()));
-    console.log(tx.decode());
   });
 
   it("should be able to create a transaction from a decoded hex", async () => {
@@ -96,15 +93,13 @@ describe("Transaction", () => {
         Sender: "YAqfGX0XLFJGddcsu6Eq/F+WKg8BmQ01IapVn2oJ5E0=",
         Contract: [
           {
-            Type: 0,
             Parameter: {
-              type_url: "type.googleapis.com/proto.TransferContract",
+              typeUrl: "type.googleapis.com/proto.TransferContract",
               value:
                 "CiBIXSEqNUEP3vcxQZ+TgKmimE2IU4ioB8KX08LLLEZ83hIDS0xWGIDC1y8=",
             },
           },
         ],
-        PermissionID: 0,
         Data: ["S0xFVkVSIFRFU1Q="],
         KAppFee: 500000,
         BandwidthFee: 1000000,
@@ -114,12 +109,6 @@ describe("Transaction", () => {
       Signature: [
         "HifozgqUS9GbbROm1hnWvf9RJj9dh2F+ZXkWxUdtbfkzlXXq0KB5IwT9Q06R2iDmg3D/Qfjb2Dz0YHxnzqe1DA==",
       ],
-      Result: 0,
-      ResultCode: 0,
-      Receipts: [],
-      Block: 0,
-      GasLimit: 0,
-      GasMultiplier: 0,
     };
 
     const tx = new Transaction();

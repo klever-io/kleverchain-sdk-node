@@ -47,7 +47,7 @@ class Account {
       this.balance = 0;
       this.nonce = 0;
 
-      console.log(e);
+      console.error(e);
       throw e;
     }
   }
@@ -128,7 +128,7 @@ class Account {
       const res = await req.json();
       hash = res.data.tx.hash;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     const signature = await this.signMessage(hash);
 

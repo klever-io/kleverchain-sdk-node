@@ -218,4 +218,5 @@ export const paramContractMap = {
   [TransactionType.Deposit]: "KAppFeeDeposit",
   [TransactionType.ITOTrigger]: "KAppFeeITOTrigger",
   [TransactionType.SmartContract]: "KAppFeeSmartContract",
+  [-1]: "UNRECOGNIZED",
 };

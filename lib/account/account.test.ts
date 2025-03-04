@@ -42,8 +42,6 @@ describe("Account", () => {
 
     const res1 = await account.buildTransaction([tx]);
 
-    console.log(res1);
-
     expect(res1?.RawData).toBeTruthy();
   });
 });
