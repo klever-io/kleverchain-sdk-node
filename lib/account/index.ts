@@ -98,11 +98,18 @@ class Account {
     txData?: string[],
     options?: ITxOptionsRequest
   ): Promise<ITransaction> => {
-    return await new KleverWeb().buildTransaction(contracts, txData, {
+    const optionsWithDefaults = {
+      ...options,
       sender: options?.sender || this.address,
       nonce: options?.nonce || this.nonce,
       provider: options?.provider || utils.getProviders(),
-    });
+    };
+
+    return await new KleverWeb().buildTransaction(
+      contracts,
+      txData,
+      optionsWithDefaults
+    );
   };
 
   signMessage = async (message: string): Promise<string> => {
