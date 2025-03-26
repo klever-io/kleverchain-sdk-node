@@ -19,8 +19,8 @@ describe("Account", () => {
 
   it("should be able to build a transaction", async () => {
     utils.setProviders({
-      api: "https://api.testnet.klever.finance",
-      node: "https://node.testnet.klever.finance",
+      api: "https://api.testnet.klever.org",
+      node: "https://node.testnet.klever.org",
     });
 
     const privateKey = process.env.PRIVATE_KEY;
@@ -47,8 +47,8 @@ describe("Account", () => {
 
   it("should be able to build a transaction with kda fee", async () => {
     utils.setProviders({
-      api: "https://api.testnet.klever.finance",
-      node: "https://node.testnet.klever.finance",
+      api: "https://api.testnet.klever.org",
+      node: "https://node.testnet.klever.org",
     });
 
     const privateKey = process.env.PRIVATE_KEY;

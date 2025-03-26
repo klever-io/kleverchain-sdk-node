@@ -67,8 +67,8 @@ const generateKeyPair = async (): Promise<{
 const getProviders = (): IProvider => {
   return (
     globalThis.kleverProviders || {
-      node: "https://node.mainnet.klever.finance",
-      api: "https://api.mainnet.klever.finance",
+      node: "https://node.mainnet.klever.org",
+      api: "https://api.mainnet.klever.org",
     }
   );
 };
@@ -215,7 +215,7 @@ export const getNetworkParams = async (
   network = "mainnet"
 ): Promise<IParsedNetworkParam[]> => {
   const res = await fetch(
-    `https://api.${network}.klever.finance/v1.0/network/network-parameters`,
+    `https://api.${network}.klever.org/v1.0/network/network-parameters`,
     {
       method: "GET",
     }
