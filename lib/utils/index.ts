@@ -4,10 +4,11 @@ import * as ed from "@noble/ed25519";
 
 import { IBroadcastResponse, IFees } from "@klever/kleverweb/dist/types/dtos";
 import { bech32 } from "bech32";
+import { ABITypeMap } from "../types/abi";
 import { IDecodedTransaction } from "../types/dtos";
 import { IParsedNetworkParam } from "../types/proposals";
+import { BASE_TX_SIZE } from "./globals";
 import { paramContractMap, proposalsMap } from "./proposals";
-import { BASE_TX_SIZE, KLV_PRECISION } from "./globals";
 
 const decodeAddress = async (address: string): Promise<Uint8Array> => {
   const decoded = bech32.decode(address);
@@ -271,6 +272,37 @@ export const getBandwidthFee = (
   return bandwidthFee;
 };
 
+export const getCleanType = (abiType: string, toLower = true) => {
+  const isOptional = abiType.toLowerCase().startsWith("option");
+
+  if (isOptional) {
+    let matches = abiType.match(/<(.*)>/);
+    if (matches && matches.length > 1) abiType = matches[1];
+  }
+
+  if (!Object.values(ABITypeMap).flat().includes(abiType)) {
+    abiType = abiType.split("<")[0]; // Remove Generics
+  }
+
+  if (toLower) {
+    abiType = abiType.toLowerCase();
+  }
+  return abiType;
+};
+
+export const getJSType = (abiType: string): string => {
+  const cleanType = getCleanType(abiType, true);
+
+  for (const [key, values] of Object.entries(ABITypeMap)) {
+    if (values.includes(cleanType)) {
+      return key;
+    }
+  }
+
+  return abiType;
+};
+
+
 const utils = {
   getAddressFromPrivateKey,
   generateKeyPair,
@@ -288,6 +320,8 @@ const utils = {
   validateAddress,
   calculateFees,
   getNetworkParams,
+  getCleanType,
+  getJSType,
 };
 
 export default utils;

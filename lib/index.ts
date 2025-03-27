@@ -49,6 +49,9 @@ import Transaction, {
   proto,
 } from "./transaction";
 
+import abiDecoder from "./utils/abi_decoder";
+import abiEncoder from "./utils/abi_encoder";
+
 export {
   Account,
   utils,
@@ -56,6 +59,8 @@ export {
   Contracts,
   TXContract_ContractType,
   proto,
+  abiDecoder,
+  abiEncoder,
 };
 
 export {
