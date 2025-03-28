@@ -44,7 +44,6 @@ class Account {
       if (sync) {
         await this.sync();
       }
-      await this.sync();
     } catch (e) {
       this.address = "";
       this.balance = 0;
