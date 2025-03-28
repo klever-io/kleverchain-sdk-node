@@ -23,16 +23,16 @@ class Account {
   private nonce!: number;
   ready: Promise<void>;
 
-  constructor(privateKey?: string) {
+  constructor(privateKey?: string, sync = true) {
     if (privateKey) {
       this.privateKey = privateKey;
-      this.ready = this.init(privateKey);
+      this.ready = this.init(sync, privateKey);
     } else {
-      this.ready = this.init();
+      this.ready = this.init(sync);
     }
   }
 
-  private async init(privateKey?: string) {
+  private async init(sync = true, privateKey?: string) {
     try {
       if (privateKey) {
         this.address = await utils.getAddressFromPrivateKey(this.privateKey);
@@ -41,7 +41,9 @@ class Account {
         this.privateKey = keyPair.privateKey;
         this.address = keyPair.address;
       }
-      await this.sync();
+      if (sync) {
+        await this.sync();
+      }
     } catch (e) {
       this.address = "";
       this.balance = 0;
