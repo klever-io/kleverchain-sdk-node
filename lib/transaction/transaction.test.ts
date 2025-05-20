@@ -9,7 +9,43 @@ describe("Transaction", () => {
     expect(tx).toBeInstanceOf(Transaction);
   });
 
-  it("should be able to create a new transaction with transfer contract", async () => {
+  it("should be able to create a new transaction with transfer", async () => {
+    const enc = new TextEncoder();
+    const senderDecoded = await utils.decodeAddress(
+      "klv1vq9f7xtazuk9y3n46ukthgf2l30ev2s0qxvs6dfp4f2e76sfu3xshpmjsr"
+    );
+    const tx = new Transaction({
+      Sender: senderDecoded,
+      Nonce: 158,
+      BandwidthFee: 1000000,
+      KAppFee: 500000,
+      Version: 1,
+      ChainID: enc.encode("100420"),
+    });
+
+    const transfer = Contracts.TransferContract.fromPartial({
+      ToAddress: await utils.decodeAddress(
+        "klv1fpwjz234gy8aaae3gx0e8q9f52vymzzn3z5q0s5h60pvktzx0n0qwvtux5"
+      ),
+      AssetID: enc.encode("KLV"),
+      Amount: 100 * 10 ** 6,
+    });
+
+    tx.addContract(TXContract_ContractType.TransferContractType, transfer);
+
+    await tx.sign(
+      "0011223344556677889900112233445566778899001122334455667788991122"
+    );
+
+    expect(tx.data.RawData?.Sender).toEqual(senderDecoded);
+    expect(tx.data.RawData?.Nonce).toEqual(158);
+
+    expect(tx.data.RawData?.Contract?.[0]?.Parameter?.type_url).toEqual(
+      "type.googleapis.com/proto.TransferContract"
+    );
+  });
+
+  it("should be able to create a new transaction with multiple contracts", async () => {
     const enc = new TextEncoder();
     const senderDecoded = await utils.decodeAddress(
       "klv1vq9f7xtazuk9y3n46ukthgf2l30ev2s0qxvs6dfp4f2e76sfu3xshpmjsr"
@@ -94,7 +130,7 @@ describe("Transaction", () => {
         Contract: [
           {
             Parameter: {
-              typeUrl: "type.googleapis.com/proto.TransferContract",
+              type_url: "type.googleapis.com/proto.TransferContract",
               value:
                 "CiBIXSEqNUEP3vcxQZ+TgKmimE2IU4ioB8KX08LLLEZ83hIDS0xWGIDC1y8=",
             },
