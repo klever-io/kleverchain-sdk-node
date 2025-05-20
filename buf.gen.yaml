@@ -1,0 +1,14 @@
+version: v2
+inputs:
+  - directory: lib/transaction/proto
+plugins:
+  - strategy: all
+    local: protoc-gen-ts_proto
+    out: lib/transaction/proto
+    opt:
+      - esModuleInterop=true
+      - useOptionals=all
+      - outputJsonMethods=true
+      - outputSchema=true
+      - initializeFieldsAsUndefined=true
+      - useNumericEnumForJson=true

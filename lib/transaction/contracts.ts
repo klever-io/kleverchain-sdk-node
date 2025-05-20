@@ -1,6 +1,6 @@
 import utils from "../utils";
 import * as Contracts from "./proto/contracts";
-import * as proto from "./../../google/protobuf/any";
+import * as proto from "./proto/google/protobuf/any";
 import { Transaction as T, TXContract_ContractType } from "./proto/transaction";
 
 const enc = new TextDecoder();
