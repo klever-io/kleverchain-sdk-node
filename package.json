@@ -43,7 +43,7 @@
   "peerDependencies": {},
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
-    "@klever/kleverweb": "^1.4.0",
+    "@klever/kleverweb": "^1.4.2",
     "@noble/ed25519": "^1.7.1",
     "bech32": "^2.0.0",
     "blakejs": "^1.2.1",
