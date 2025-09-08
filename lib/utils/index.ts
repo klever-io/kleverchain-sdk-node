@@ -5,7 +5,7 @@ import * as ed from "@noble/ed25519";
 import { IBroadcastResponse, IFees } from "@klever/kleverweb/dist/types/dtos";
 import { bech32 } from "bech32";
 import { ABITypeMap } from "../types/abi";
-import { IDecodedTransaction } from "../types/dtos";
+import { ITransactionResponse } from "../types/dtos";
 import { IParsedNetworkParam } from "../types/proposals";
 import { BASE_TX_SIZE } from "./globals";
 import { paramContractMap, proposalsMap } from "./proposals";
@@ -95,7 +95,7 @@ const broadcastTransactions = async (
 
 const decodeTransaction = async (
   tx: ITransaction
-): Promise<IDecodedTransaction> => {
+): Promise<ITransactionResponse> => {
   const req = await fetch(`${getProviders().node}/transaction/decode`, {
     method: "POST",
     body: JSON.stringify(tx),
@@ -110,7 +110,7 @@ const decodeTransaction = async (
 const transactionsProcessed = async (
   txs: Promise<IBroadcastResponse>[],
   tries = 10
-): Promise<IDecodedTransaction[]> => {
+): Promise<ITransactionResponse[]> => {
   const res = await Promise.all(txs);
 
   const hashes: string[] = [];
@@ -118,7 +118,7 @@ const transactionsProcessed = async (
     hashes.push(...tx.data.txsHashes);
   });
 
-  const processedRequest: Promise<IDecodedTransaction>[] = hashes.map(
+  const processedRequest: Promise<ITransactionResponse>[] = hashes.map(
     async (hash) => {
       const array = Array.from({ length: tries }, (_, i) => i);
       let error = "";
