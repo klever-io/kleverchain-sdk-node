@@ -295,10 +295,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@klever/kleverweb@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@klever/kleverweb/-/kleverweb-1.4.0.tgz#29d8deb21ac0eb4a5b2f669669035823bc8ea016"
-  integrity sha512-anor45cSjMVdElff4TKiilCqienWbDJPBF0Xcm21O+IwduOdLRX+do1kFz/qXETHi7nttj6VLxUOWE7DIBR4Jw==
+"@klever/kleverweb@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@klever/kleverweb/-/kleverweb-1.4.2.tgz#c876eaaee62d5a8ebda494f2634042d2c794aedf"
+  integrity sha512-gC9NVDGo3OlXSaaCJGABY1EfPXLgUF5pPnyBNXct0KhWK+udldw0/ahl72qP11YyQOvvjiwXDXJ/32zXca9o1A==
 
 "@noble/ed25519@^1.7.1":
   version "1.7.1"

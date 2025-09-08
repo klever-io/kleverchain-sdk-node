@@ -1,6 +1,6 @@
 {
   "name": "@klever/sdk-node",
-  "version": "2.4.0",
+  "version": "2.4.2",
   "description": "Kleverchain SDK integration with Node JS",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -43,7 +43,7 @@
   "peerDependencies": {},
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
-    "@klever/kleverweb": "^1.4.0",
+    "@klever/kleverweb": "^1.4.2",
     "@noble/ed25519": "^1.7.1",
     "bech32": "^2.0.0",
     "blakejs": "^1.2.1",

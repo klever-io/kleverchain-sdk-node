@@ -107,7 +107,13 @@ class Account {
       provider: options?.provider || utils.getProviders(),
     };
 
-    return await new KleverWeb().buildTransaction(
+    // Init klever web instance with the options provided or defaults
+    let kleverWebInstance = new KleverWeb(
+      optionsWithDefaults.sender,
+      optionsWithDefaults.provider
+    );
+
+    return await kleverWebInstance.buildTransaction(
       contracts,
       txData,
       optionsWithDefaults
