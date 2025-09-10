@@ -46,9 +46,8 @@ export interface ITransactionContract {
   parameter: any;
 }
 
-export interface IDecodedTransaction {
-  data: {
-    tx: {
+export interface ITransactionResponse {
+      tx: {
       hash: string;
       sender: string;
       nonce: number;
@@ -61,7 +60,10 @@ export interface IDecodedTransaction {
       searchOrder: number;
       contract: ITransactionContract[];
     };
-  };
+}
+
+export interface IDecodedTransaction {
+  data: ITransactionResponse;
 
   error: string;
   code: string;
